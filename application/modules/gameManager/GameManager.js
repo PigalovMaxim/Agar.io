@@ -3,7 +3,7 @@ const BaseModule = require('../BaseModule');
 class GameManager extends BaseModule {
     constructor(options) {
         super(options);
-        this.io.on('connection', socket => {
+        options.io.on('connection', socket => {
             socket.on('move', data => this.move(data, socket));
         });
 
@@ -11,7 +11,7 @@ class GameManager extends BaseModule {
         this.mediator.subscribe(this.EVENTS.USER_LOGIN, user => this.join(user));
 
         this.mustUpdate = false;
-        start();
+        //start();
     }
 
     start() {

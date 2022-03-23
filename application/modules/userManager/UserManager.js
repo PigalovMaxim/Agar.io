@@ -4,10 +4,10 @@ class UserManager extends BaseModule {
     constructor(options) {
         super(options);
         this.users = [];
-        this.io('connection', socket => {
+        /* options.io('connection', socket => {
             socket.on('login', data => this.login(data, socket));
             socket.on('disconnect', () => this.logout(socket));
-        });
+        }); */
 
         this.mediator.set(this.TRIGGERS.GET_USER, id => this._getUser(id));
         this.mediator.set(this.TRIGGERS.GET_USERS, () => this._getUsers());
