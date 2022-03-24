@@ -24,8 +24,8 @@ const Menu = (props) => {
       {
         (!isLogin) ?
         <div className={s.form}>
-          <input className={s.input} placeholder="Никнейм" />
-          <input className={s.input} placeholder="Пароль" />
+          <input ref={nickInput} className={s.input} placeholder="Никнейм" />
+          <input ref={passwordInput} className={s.input} placeholder="Пароль" />
           <button
             onClick={() => {
               const rand = Math.random() * 100000;
