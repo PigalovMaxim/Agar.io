@@ -7,20 +7,6 @@ export default class Game {
     this.canv = options.canv;
     this.ctx = options.ctx;
     this.socket = options.socket;
-    this.socket.emit("getScene", (response) => {
-      if (!response.status) return;
-      config.player = response.player;
-      config.enemies = response.enemies;
-      config.food = response.food;
-    });
-    /* config.player = {
-      x: Math.round(Math.random() * config.WINDOW.WIDTH),
-      y: Math.round(Math.random() * config.WINDOW.HEIGHT),
-      radius: 25,
-      color: "#fff323",
-      speed: 3,
-      nick: 'Ꭿ฿0฿Ꭿ'
-    }; */
     config.startPoint = { x: config.player.x, y: config.player.y };
 
     config.xRatio = document.documentElement.clientWidth / config.camera.width;
@@ -41,6 +27,7 @@ export default class Game {
       config.player = response.player;
       config.enemies = response.enemies;
       config.food = response.food;
+      console.log(config.player, config.food, config.enemies);
       this.draw.drawField();
     });
   }

@@ -1,26 +1,26 @@
 const express = require("express");
 const app = express();
 const server = require('http').createServer(app);
-const io = require('socket.io')(server);
+const io = require('socket.io')(server,  {cors: {origin: "*"}});
 
 const Mediator = require('./application/modules/Mediator');
 const UserManager = require("./application/modules/userManager/UserManager");
 const GameManager = require("./application/modules/gameManager/GameManager");
 
-/*
-app.use((req, res, next) => {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET');
-    res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
-    res.setHeader('Access-Control-Allow-Credentials', true);
-    next();
-});
-*/
 
-const { PORT, NAME, VERSION, MEDIATOR } = require('./config');
+/*app.use((req, res, next) => {
+    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000/');
+   res.setHeader('Access-Control-Allow-Methods', 'GET');
+    res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+    res.setHeader('Access-Control-Allow-Credentials', true);z
+    next();
+});*/
+
+
+const { PORT, NAME, VERSION, MEDIATOR, SOCKET } = require('./config');
 const mediator = new Mediator(MEDIATOR);
-new UserManager({ mediator, io });
-new GameManager({ mediator, io });
+new UserManager({ mediator, io, SOCKET });
+new GameManager({ mediator, io, SOCKET });
 
 const Router = require("./application/router/Router");
 const router = new Router({ mediator });
