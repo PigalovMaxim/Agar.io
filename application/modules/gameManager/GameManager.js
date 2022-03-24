@@ -5,49 +5,80 @@ class GameManager extends BaseModule {
         super(options);
 
         this.players = [];
+        this.window = {width: 3000, height: 3000};
+        this.camera = {width: 1200, height: 600};
+        this.foods = [];
+        this._createFood();
 
         options.io.on('connection', socket => {
-            socket.on('move', data => this.move(data, socket));
+            socket.on(options.SOCKET.MOVE, data => this.move(data, socket));
+            socket.on(options.SOCKET.JOIN, response => this.join(response, socket));
+            socket.on(options.SOCKET.GET_SCENE, response => this.getScene(response, socket.id));
         });
 
         // Сюда надо писать set и subscribe
-        this.mediator.subscribe(this.EVENTS.USER_LOGIN, user => this.join(user));
 
-        this.mustUpdate = false;
-        //start();
+        this.mustUpdate = true;
+        start();
+    }
+
+    _createFood(){
+        for(let i = 0; i < Math.round(this.window.width/3); i++){
+            const food = {
+                x: Math.round(Math.random() * this.window.width), 
+                y: Math.round(Math.random() * this.window.height)
+            };
+            this.foods.push(food);
+        }
+    }
+
+    _generateColor(){
+        let letters = '0123456789ABCDEF';
+        let color = '#';
+        for (let i = 0; i < 6; i++) {
+          color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
     }
 
     start() {
         setInterval(() => {
             if (this.mustUpdate) {
                 this.mustUpdate = false;
-                io.emit('getScene', mediator.get(mediator.TRIGGERS.GET_USERS));
+                 io.emit('getScene', this.mediator.get(this.mediator.TRIGGERS.GET_USERS)); 
             }
         }, 100);
-    }
+    } 
+    
 
     kill(user){
         
     }
 
-    join(user, data) {
-        const { x, y, radius, color, speed } = data;
-        const gamer = { 
-            id: user.id, 
+    join(response, socket) {
+        const user = this.mediator.get(this.mediator.TRIGGERS.GET_USER, socket.id);
+        const player = { 
+            id: socket.id, 
             nick: user.nick, 
-            x, 
-            y, 
-            radius, 
-            color, 
-            speed
+            x: Math.round(Math.random()*this.window.width), 
+            y: Math.round(Math.random()*this.window.height), 
+            radius: 25, 
+            color: this._generateColor(), 
+            speed: 3
         };     
-        this.gamers.push(gamer);
+        this.players.push(player);
         this.mustUpdate = true;
-        return true;
+        response({ 
+            status: true,
+            window: this.window,
+            camera: this.camera,
+        });
     }
 
+    
+
     move(data, socket) {
-        const { x, y, radius, speed } = data;
+        const { x, y } = data;
         const user = this.mediator.get(this.TRIGGERS.GET_USER, socket.id);
         if (x && y && user) {
             user.x = x;
@@ -55,6 +86,17 @@ class GameManager extends BaseModule {
             this.mustUpdate = true;
         }
     }
+
+    getScene(response, id){
+        const enemies = this.players.filter(player => id === player.id);
+        const player = this.players.find(player => player.id === id);
+        const food = this.foods;
+        response({ status: true, enemies, player, food });
+    }
 }
 
 module.exports = GameManager;
+
+/*  Сделать правильную отправку getScene
+    
+*/ 

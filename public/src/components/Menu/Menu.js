@@ -29,6 +29,7 @@ const Menu = (props) => {
           <button
             onClick={() => {
               const rand = Math.random() * 100000;
+              console.log('pizda');
               socket.emit('login', { 
                 nick: nickInput.current.value,
                 hash: md5(md5(nickInput.current.value + passwordInput.current.value) + rand),

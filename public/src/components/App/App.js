@@ -5,7 +5,7 @@ import Canvas from '../Canvas';
 import Menu from '../Menu/Menu';
 
 import { io } from "socket.io-client";
-const socket = io();
+const socket = io('http://localhost:3001/');
 
 function App() {
   const [isGameStarted, startGame] = useState(false);
