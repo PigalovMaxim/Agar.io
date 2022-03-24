@@ -20,4 +20,5 @@
 6. eatFood (index)
 7. eatPlayer (id)
 8. scoreUp (scoreSize)
+9. move (x, y)
 # done
