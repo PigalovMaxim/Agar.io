@@ -1,0 +1,14 @@
+* {
+  padding: 0;
+  box-sizing: border-box;
+  outline: none;
+  border: none;
+  text-decoration: none;
+  list-style: none;
+}
+.App {
+  background-color: #ebebeb;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+}
