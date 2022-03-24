@@ -10,7 +10,7 @@
 # need
 1. login (login, hash, rnd) => true или false
 2. registration (login, hash) => true или false
-3. join (nick, id, x, y, radius, color, speed) => true или false
+3. join (nick, id, x, y, radius, color, speed) => window, camera
 4. getScene () => [ 
     enemies { nick, id, x, y, radius, color, speed }, 
     player { nick, id, x, y, radius, color, speed }, 
