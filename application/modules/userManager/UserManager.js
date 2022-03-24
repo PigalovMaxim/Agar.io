@@ -1,4 +1,5 @@
 const BaseModule = require('../BaseModule');
+let md5 = require('md5');
 
 class UserManager extends BaseModule {
     constructor(options) {
@@ -13,30 +14,44 @@ class UserManager extends BaseModule {
         this.mediator.set(this.TRIGGERS.GET_USERS, () => this._getUsers());
     }
 
-    _getUser(id) {
-        return this.users.find(user => user.id === id);
+    _getUser(nick) {
+        return this.users.find(user => user.nick === nick);
     }
 
     _getUsers() {
         return this.users;
     }
 
-    login(data = {}, socket) {
-        const { nick } = data;
-        if (nick) {
+    registration(data, socket){
+        const { nick, hash } = data;
+        if(this._getUser(nick)){
+            return 'Такой никнейм занят';
+        } else {
             const user = {
+                id: socket.id,
                 nick,
-                id: socket.id
+                hash,
             }
             this.users.push(user);
-            mediator.call(mediator.EVENTS.USER_LOGIN, user);
-            socket.emit('login', user);
+            mediator.call(this.mediator.EVENTS.USER_REGISTRATION,user);
+            socket.emit('registration', user);
         }
+        return true;
     }
 
-    logout(socket) {
-        //mediator.call(mediator.EVENTS.USER_LOGOUT, user);
-        //...
+    login(data, socket) {
+        const { nick, hash, rand } = data;
+        if(hash == md5(md5(this._getUser(nick).hash + rand)+rand)){
+            return true;
+        }
+        mediator.call(mediator.EVENTS.USER_LOGIN, user);
+        socket.emit('login', user);
+    }
+
+    logout() {
+        mediator.call(mediator.EVENTS.USER_LOGOUT, user);
+        socket.emit('logout', user);
+        return true;
     }
 }
 

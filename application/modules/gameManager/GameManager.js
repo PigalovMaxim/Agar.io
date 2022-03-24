@@ -3,6 +3,9 @@ const BaseModule = require('../BaseModule');
 class GameManager extends BaseModule {
     constructor(options) {
         super(options);
+
+        this.players = [];
+
         options.io.on('connection', socket => {
             socket.on('move', data => this.move(data, socket));
         });
@@ -23,16 +26,28 @@ class GameManager extends BaseModule {
         }, 100);
     }
 
-    join(user) {
-        user.x = 300;
-        user.y = 301;
-        user.radius = 25;
-        user.color = '#f00';
-        this.mustUpdate = true;
+    kill(user){
+        
     }
 
-    move(data = {}, socket) {
-        const { x, y } = data;
+    join(user, data) {
+        const { x, y, radius, color, speed } = data;
+        const gamer = { 
+            id: user.id, 
+            nick: user.nick, 
+            x, 
+            y, 
+            radius, 
+            color, 
+            speed
+        };     
+        this.gamers.push(gamer);
+        this.mustUpdate = true;
+        return true;
+    }
+
+    move(data, socket) {
+        const { x, y, radius, speed } = data;
         const user = this.mediator.get(this.TRIGGERS.GET_USER, socket.id);
         if (x && y && user) {
             user.x = x;
