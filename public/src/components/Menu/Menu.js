@@ -17,6 +17,11 @@ const Menu = (props) => {
     HideMenu(true);
     setTimeout(() => TurnMenuOff(true), 250);
   };
+  socket.on('death', () => {
+    setTimeout(() => TurnMenuOff(false), 250);
+    HideMenu(false);
+    startGame(false);
+  });
   return (
     <div
       className={cn(s.menu, isHidden ? s.hide : "", isOff ? s.disactive : "")}
@@ -29,7 +34,6 @@ const Menu = (props) => {
           <button
             onClick={() => {
               const rand = Math.random() * 100000;
-              console.log('pizda');
               socket.emit('login', { 
                 nick: nickInput.current.value,
                 hash: md5(md5(nickInput.current.value + passwordInput.current.value) + rand),

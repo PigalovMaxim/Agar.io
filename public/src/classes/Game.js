@@ -30,10 +30,18 @@ export default class Game {
       console.log(config.player, config.food, config.enemies);
       this.draw.drawField();
     });
+    this.interval = null;
+    this.socket.on("death", () => {
+      this.stop();
+    });
   }
 
   start() {
-    setInterval(() => this._update(), 15);
+    this.interval = setInterval(() => this._update(), 15);
+  }
+
+  stop() {
+    clearInterval(this.interval);
   }
 
   _update() {
@@ -85,7 +93,7 @@ export default class Game {
         distance < config.player.radius &&
         enemy.radius * 1.5 < config.player.radius
       ) {
-        this.socket.emit("eatPlayer", config.enemies[index].id);
+        this.socket.emit("eatPlayer", enemy.id);
         this._eat(enemy.radius);
       }
     });
