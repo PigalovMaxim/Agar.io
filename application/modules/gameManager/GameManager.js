@@ -98,5 +98,5 @@ class GameManager extends BaseModule {
 module.exports = GameManager;
 
 /*  Сделать правильную отправку getScene
-    
+    hghghg
 */ 
