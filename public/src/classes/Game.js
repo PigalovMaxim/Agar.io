@@ -24,8 +24,8 @@ export default class Game {
     });
     this.socket.on("getScene", (response) => {
       if (!response.status) return;
-      config.player = response.player;
-      config.enemies = response.enemies;
+      config.enemies = response.players.filter( player => player.id !== config.id );
+      config.player = response.players.find( player => player.id === config.id );
       config.food = response.food;
       console.log(config.player, config.food, config.enemies);
       this.draw.drawField();
