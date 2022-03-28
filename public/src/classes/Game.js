@@ -24,24 +24,16 @@ export default class Game {
     });
     this.socket.on("getScene", (response) => {
       if (!response.status) return;
-      config.enemies = response.players.filter( player => player.id !== config.id );
-      config.player = response.players.find( player => player.id === config.id );
+      config.player = response.player;
+      config.enemies = response.enemies;
       config.food = response.food;
       console.log(config.player, config.food, config.enemies);
       this.draw.drawField();
     });
-    this.interval = null;
-    this.socket.on("death", () => {
-      this.stop();
-    });
   }
 
   start() {
-    this.interval = setInterval(() => this._update(), 15);
-  }
-
-  stop() {
-    clearInterval(this.interval);
+    setInterval(() => this._update(), 15);
   }
 
   _update() {
@@ -93,13 +85,14 @@ export default class Game {
         distance < config.player.radius &&
         enemy.radius * 1.5 < config.player.radius
       ) {
-        this.socket.emit("eatPlayer", enemy.id);
+        this.socket.emit("eatPlayer", config.enemies[index].id);
         this._eat(enemy.radius);
       }
     });
   }
 
   _eat(scoreSize) {
+    this.socket.emit("scoreUp", scoreSize);
     config.score += scoreSize;
     config.player.radius += Math.round(scoreSize / 20);
     config.player.speed -= Math.round(scoreSize / 2000);
