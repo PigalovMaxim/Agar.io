@@ -100,7 +100,6 @@ export default class Game {
   }
 
   _eat(scoreSize) {
-    this.socket.emit("scoreUp", scoreSize);
     config.score += scoreSize;
     config.player.radius += Math.round(scoreSize / 20);
     config.player.speed -= Math.round(scoreSize / 2000);
