@@ -6,7 +6,8 @@ class UserManager extends BaseModule {
         super(options);
         this.mediator = options.mediator;
         this.users = [];
-         options.io.on('connection', socket => {
+
+        options.io.on('connection', socket => {
             
             socket.on(options.SOCKET.REGISTRATION, (data, response) => this.registration(data, response, socket));
             socket.on(options.SOCKET.LOGIN, (data, response) => this.login(data, response, socket));
@@ -41,7 +42,7 @@ class UserManager extends BaseModule {
             }
             this.users.push(user);
             this.mediator.call(this.mediator.EVENTS.USER_REGISTRATION,user);
-            response({ status: true });
+            response({ status: true, id: socket.id });
         }
     }
 

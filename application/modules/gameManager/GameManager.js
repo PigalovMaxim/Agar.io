@@ -3,23 +3,25 @@ const BaseModule = require('../BaseModule');
 class GameManager extends BaseModule {
     constructor(options) {
         super(options);
-
+        this.io = options.io;
         this.players = [];
         this.window = {width: 3000, height: 3000};
         this.camera = {width: 1200, height: 600};
         this.foods = [];
         this._createFood();
 
-        options.io.on('connection', socket => {
-            socket.on(options.SOCKET.MOVE, data => this.move(data, socket));
+        this.io.on('connection', socket => {
+            socket.on(options.SOCKET.MOVE, data => this.move(data, socket.id));
             socket.on(options.SOCKET.JOIN, response => this.join(response, socket));
-            socket.on(options.SOCKET.GET_SCENE, response => this.getScene(response, socket.id));
+            socket.on(options.SOCKET.EAT_FOOD, index => this.eatFood(index, socket.id));
+            socket.on(options.SOCKET.EAT_PLAYER, eatedId => this.eatPlayer(eatedId, socket.id));
+            socket.on(options.SOCKET.GET_SCENE, () => this.getScene());
         });
 
         // Сюда надо писать set и subscribe
 
         this.mustUpdate = true;
-        start();
+        this.start();
     }
 
     _createFood(){
@@ -45,14 +47,41 @@ class GameManager extends BaseModule {
         setInterval(() => {
             if (this.mustUpdate) {
                 this.mustUpdate = false;
-                 io.emit('getScene', this.mediator.get(this.mediator.TRIGGERS.GET_USERS)); 
+                this.io.emit('getScene', this.getScene()); 
             }
         }, 100);
     } 
     
+    eatFood(index, id){
+        this.foods.splice(index, 1);
+        this.players.forEach((player, i) => {
+            if(player.id === id){
+                player.score += 10;
+                player.radius += 0.1;
+                player.speed -= 0.01;
+                if(player.speed <= 0.01) player.speed = 0.1;
+            }
+        });
+        this.mustUpdate = true;
+    }
 
-    kill(user){
-        
+    eatPlayer(eatedId, id){
+        let eatedPlayer = null;
+        this.players.forEach((player, i) => {
+            if(player.id === eatedId){
+                this.io.to(eatedId).emit('death');
+                eatedPlayer = player;
+                this.players.splice(i, 1);
+            }
+        });
+
+        this.players.forEach((player, i) => {
+            if(player === id){
+                player.score += eatedPlayer.radius;
+                player.radius += Math.round(eatedPlayer.radius / 20);
+                player.speed -= Math.round(eatedPlayer.radius / 2000);
+            }
+        }); 
     }
 
     join(response, socket) {
@@ -62,6 +91,7 @@ class GameManager extends BaseModule {
             nick: user.nick, 
             x: Math.round(Math.random()*this.window.width), 
             y: Math.round(Math.random()*this.window.height), 
+            score: 0,
             radius: 25, 
             color: this._generateColor(), 
             speed: 3
@@ -77,26 +107,29 @@ class GameManager extends BaseModule {
 
     
 
-    move(data, socket) {
-        const { x, y } = data;
-        const user = this.mediator.get(this.TRIGGERS.GET_USER, socket.id);
-        if (x && y && user) {
-            user.x = x;
-            user.y = y;
-            this.mustUpdate = true;
-        }
+    move(data, id) {
+        const { x, y }  = data;
+        this.players.forEach( (player) => {
+            if(player.id == id){
+                player.x += x;
+                player.y += y;
+                if(player.x >= this.window.width) player.x = this.window.width;
+                if(player.y >= this.window.height) player.y = this.window.height;
+                if(player.x <= 0) player.x = 0;
+                if(player.y <= 0) player.y = 0;
+                this.mustUpdate = true;
+            }
+        });
     }
 
-    getScene(response, id){
-        const enemies = this.players.filter(player => id === player.id);
-        const player = this.players.find(player => player.id === id);
+    getScene(){
         const food = this.foods;
-        response({ status: true, enemies, player, food });
+        return { status: true, players: this.players, food };
     }
 }
 
 module.exports = GameManager;
 
-/*  Сделать правильную отправку getScene
-    hghghg
+/*  
+    пофиксить хуйню огромную
 */ 
