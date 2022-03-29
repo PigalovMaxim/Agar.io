@@ -16,9 +16,8 @@ class GameManager extends BaseModule {
             socket.on(options.SOCKET.EAT_FOOD, index => this.eatFood(index, socket.id));
             socket.on(options.SOCKET.EAT_PLAYER, eatedId => this.eatPlayer(eatedId, socket.id));
             socket.on(options.SOCKET.GET_SCENE, () => this.getScene());
+            socket.on(options.SOCKET.INCREASE_SIZE, (score, radius, speed) => this.increaseSize(socket.id, score, radius, speed));
         });
-
-        // Сюда надо писать set и subscribe
 
         this.mustUpdate = true;
         this.start();
@@ -32,6 +31,7 @@ class GameManager extends BaseModule {
             };
             this.foods.push(food);
         }
+        this.mustUpdate = true;
     }
 
     _generateColor(){
@@ -52,20 +52,24 @@ class GameManager extends BaseModule {
         }, 100);
     } 
     
-    eatFood(index, id){
+    eatFood(index){
         this.foods.splice(index, 1);
+        this.mustUpdate = true;
+    }
+
+    increaseSize(id, score, radius, speed) {
         this.players.forEach((player, i) => {
             if(player.id === id){
-                player.score += 10;
-                player.radius += 0.1;
-                player.speed -= 0.01;
-                if(player.speed <= 0.01) player.speed = 0.1;
+                console.log(player, score, radius, speed);
+                player.score = score;
+                player.radius = radius;
+                player.speed = speed;
             }
         });
         this.mustUpdate = true;
     }
 
-    eatPlayer(eatedId, id){
+    eatPlayer(eatedId){
         let eatedPlayer = null;
         this.players.forEach((player, i) => {
             if(player.id === eatedId){
@@ -74,14 +78,7 @@ class GameManager extends BaseModule {
                 this.players.splice(i, 1);
             }
         });
-
-        this.players.forEach((player, i) => {
-            if(player === id){
-                player.score += eatedPlayer.radius;
-                player.radius += Math.round(eatedPlayer.radius / 20);
-                player.speed -= Math.round(eatedPlayer.radius / 2000);
-            }
-        }); 
+        this.mustUpdate = true;
     }
 
     join(response, socket) {
@@ -129,7 +126,3 @@ class GameManager extends BaseModule {
 }
 
 module.exports = GameManager;
-
-/*  
-    пофиксить хуйню огромную
-*/ 

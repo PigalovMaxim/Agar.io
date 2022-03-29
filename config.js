@@ -12,8 +12,7 @@ const CONFIG = {
         TRIGGERS: {
             GET_USER: 'GET_USER',
         }
-    },
-
+    },   
     SOCKET: {
         CONNECTION: 'connection',
         DISCONNECT: 'disconnect',
@@ -22,9 +21,17 @@ const CONFIG = {
         LOGIN: 'login',
         MOVE: 'move',
         JOIN: 'join',
-        KILL: 'kill',
-        EAT: 'eat',
-    }
-}
+        EAT_PLAYER: 'eatPlayer',
+        EAT_FOOD: 'eatFood',
+        MESSAGE: 'message',
+        INCREASE_SIZE: 'increaseSize'
+    },
+    DATABASE: {
+        HOST: '',
+        NAME: 'agar.db',
+        USER: '',
+        PASS: ''
+    },
+};
 
 module.exports = CONFIG;

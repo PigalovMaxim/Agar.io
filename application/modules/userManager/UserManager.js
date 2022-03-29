@@ -53,7 +53,6 @@ class UserManager extends BaseModule {
                 status: true, 
                 id: socket.id
             });
-            //this.mediator.call(this.mediator.EVENTS.USER_LOGIN, user);
             return;
         }      
         response({ status: false });;
