@@ -24,7 +24,17 @@ class DB {
         }
     }
 
-    login(nick){
+    login({id,nick}){
+        new Promise(resolve => {
+            this.db.serialize(() => {
+                const query = "UPDATE users SET socket_id=? WHERE nick=?";
+                this.db.get(
+                    query,
+                    [id, nick],
+                    (err, row) => resolve(err ? null : row)
+                );
+            });
+        });
         return this._getUserByNick(nick);
     }
 
