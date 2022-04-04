@@ -10,7 +10,9 @@ const CONFIG = {
             USER_REGISTRATION: 'USER_REGISTRATION',
         },
         TRIGGERS: {
-            GET_USER: 'GET_USER',
+            GET_USER_BY_NICK: 'GET_USER_BY_NICK',
+            GET_USER_BY_ID: 'GET_USER_BY_ID',
+            LOGIN: 'LOGIN',
         }
     },   
     SOCKET: {
@@ -30,7 +32,7 @@ const CONFIG = {
         HOST: '',
         NAME: 'agar.db',
         USER: '',
-        PASS: ''
+        PASS: '',
     },
 };
 

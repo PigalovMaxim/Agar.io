@@ -60,7 +60,6 @@ class GameManager extends BaseModule {
     increaseSize(id, score, radius, speed) {
         this.players.forEach((player, i) => {
             if(player.id === id){
-                console.log(player, score, radius, speed);
                 player.score = score;
                 player.radius = radius;
                 player.speed = speed;
@@ -82,23 +81,24 @@ class GameManager extends BaseModule {
     }
 
     join(response, socket) {
-        const user = this.mediator.get(this.mediator.TRIGGERS.GET_USER, socket.id);
-        const player = { 
-            id: socket.id, 
-            nick: user.nick, 
-            x: Math.round(Math.random()*this.window.width), 
-            y: Math.round(Math.random()*this.window.height), 
-            score: 0,
-            radius: 25, 
-            color: this._generateColor(), 
-            speed: 3
-        };     
-        this.players.push(player);
-        this.mustUpdate = true;
-        response({ 
-            status: true,
-            window: this.window,
-            camera: this.camera,
+        this.mediator.get(this.mediator.TRIGGERS.GET_USER_BY_ID, socket.id).then(user=> {
+            const player = { 
+                id: socket.id, 
+                nick: user.nick, 
+                x: Math.round(Math.random()*this.window.width), 
+                y: Math.round(Math.random()*this.window.height), 
+                score: 0,
+                radius: 25, 
+                color: this._generateColor(), 
+                speed: 3
+            };     
+            this.players.push(player);
+            this.mustUpdate = true;
+            response({ 
+                status: true,
+                window: this.window,
+                camera: this.camera,
+            });
         });
     }
 
