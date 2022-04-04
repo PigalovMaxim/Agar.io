@@ -9,8 +9,8 @@ const UserManager = require("./application/modules/userManager/UserManager");
 const GameManager = require("./application/modules/gameManager/GameManager");
 
 const { PORT, NAME, VERSION, MEDIATOR, SOCKET, DATABASE } = require('./config');
-const db = new DB(DATABASE);
 const mediator = new Mediator(MEDIATOR);
+const db = new DB(DATABASE, mediator);
 new UserManager({ mediator, io, SOCKET, db });
 new GameManager({ mediator, io, SOCKET, db });
 

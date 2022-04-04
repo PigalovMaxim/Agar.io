@@ -4,58 +4,37 @@ let md5 = require('md5');
 class UserManager extends BaseModule {
     constructor(options) {
         super(options);
+
         this.mediator = options.mediator;
-        this.users = [];
 
         options.io.on('connection', socket => {
-            
-            socket.on(options.SOCKET.REGISTRATION, (data, response) => this.registration(data, response, socket));
-            socket.on(options.SOCKET.LOGIN, (data, response) => this.login(data, response, socket));
+            socket.on(options.SOCKET.REGISTRATION, (data, response) => this.registration(data, response, socket.id));
+            socket.on(options.SOCKET.LOGIN, (data, response) => this.login(data, response, socket.id));
         }); 
-
-        this.mediator.set(this.TRIGGERS.GET_USER, id => this._getUserById(id));
-        this.mediator.set(this.TRIGGERS.GET_USERS, () => this._getUsers());
     }
 
-    _getUserById(id) {
-        return this.users.find(user => user.id === id);
-    }
-
-    _getUserByName(nick) {
-        return this.users.find(user => user.nick === nick);
-    }
-
-    _getUsers() {
-        return this.users;
-    }
-
-    registration(data, response, socket){
+    registration(data, response, id){
         const { nick, hash } = data;
-        console.log('registration'+data);
-        if(this._getUserByName(nick)){
-            response({ status: false });
-        } else {
-            const user = {
-                id: socket.id,
-                nick,
-                hash,
+        this.mediator.get(this.mediator.TRIGGERS.GET_USER_BY_NICK, nick).then(user => {
+            if(user){
+                response({ status: false });    
+            } else {
+                this.mediator.call(this.mediator.EVENTS.USER_REGISTRATION, {nick, hash, id});
+                response({ status: true, id }); 
             }
-            this.users.push(user);
-            this.mediator.call(this.mediator.EVENTS.USER_REGISTRATION,user);
-            response({ status: true, id: socket.id });
-        }
+        });
     }
 
-    login(data, response, socket) {
-        const { nick, hash, rand } = data;
-        if(this._getUserByName(nick) && hash == md5(this._getUserByName(nick).hash + rand)){
+    login(data, response, id) {
+        const user = this.mediator.get(this.mediator.TRIGGERS.LOGIN, data);
+        if(user){
             response({ 
                 status: true, 
-                id: socket.id
+                id
             });
             return;
         }      
-        response({ status: false });;
+        response({ status: false });
     }
 }
 
