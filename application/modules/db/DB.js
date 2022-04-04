@@ -24,12 +24,8 @@ class DB {
         }
     }
 
-    login({nick, hash, rand}){
-        this._getUserByNick(nick).then(user => {
-            if(user && hash == md5(user.hash + rand)){
-                return user;
-            };
-        });
+    login(nick){
+        return this._getUserByNick(nick);
     }
 
     _getUserById(id) {

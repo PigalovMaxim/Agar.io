@@ -26,15 +26,21 @@ class UserManager extends BaseModule {
     }
 
     login(data, response, id) {
-        const user = this.mediator.get(this.mediator.TRIGGERS.LOGIN, data);
-        if(user){
-            response({ 
-                status: true, 
-                id
-            });
-            return;
-        }      
-        response({ status: false });
+        const {nick, hash, rand} = data;
+        let mainUser = null;
+        this.mediator.get(this.mediator.TRIGGERS.LOGIN, nick).then(user => {
+            if(user && hash == md5(user.hash + rand)){
+                mainUser = user;
+            };
+            if(mainUser){
+                response({ 
+                    status: true, 
+                    id
+                });
+                return;
+            }      
+            response({ status: false });
+        });
     }
 }
 

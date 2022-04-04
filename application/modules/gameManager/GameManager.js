@@ -12,7 +12,7 @@ class GameManager extends BaseModule {
 
         this.io.on('connection', socket => {
             socket.on(options.SOCKET.MOVE, data => this.move(data, socket.id));
-            socket.on(options.SOCKET.JOIN, response => this.join(response, socket));
+            socket.on(options.SOCKET.JOIN, response => this.join(response, socket.id));
             socket.on(options.SOCKET.EAT_FOOD, index => this.eatFood(index, socket.id));
             socket.on(options.SOCKET.EAT_PLAYER, eatedId => this.eatPlayer(eatedId, socket.id));
             socket.on(options.SOCKET.GET_SCENE, () => this.getScene());
@@ -80,10 +80,10 @@ class GameManager extends BaseModule {
         this.mustUpdate = true;
     }
 
-    join(response, socket) {
-        this.mediator.get(this.mediator.TRIGGERS.GET_USER_BY_ID, socket.id).then(user=> {
+    join(response, id) {
+        this.mediator.get(this.mediator.TRIGGERS.GET_USER_BY_ID, id).then(user=> {
             const player = { 
-                id: socket.id, 
+                id: id, 
                 nick: user.nick, 
                 x: Math.round(Math.random()*this.window.width), 
                 y: Math.round(Math.random()*this.window.height), 
