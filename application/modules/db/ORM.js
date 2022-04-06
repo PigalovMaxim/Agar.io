@@ -40,6 +40,7 @@ class ORM {
         });
     }
 
+
     delete(tables, params = {}, operand = 'AND') {
         return new Promise(resolve => {
             this.db.serialize(() => {
@@ -82,10 +83,11 @@ class ORM {
             this.db.serialize(() => {
                 const str = Object.keys(params).join(`, `);
                 const arr = Object.values(params);
+                const questionMarks = [];
+                arr.forEach(a => questionMarks.push('?'));
                 const query = `
                     INSERT INTO ${table} (${str})
-                    ${arr.length === 0 ? '' : `VALUES (${arr.join(', ')})`}`;
-
+                    ${arr.length === 0 ? '' : `VALUES (${questionMarks.join(', ')})`}`;
                     console.log(query);
                 this.db.run(
                     query,
