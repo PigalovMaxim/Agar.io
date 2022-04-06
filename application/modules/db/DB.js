@@ -1,4 +1,5 @@
 const sqlite3 = require('sqlite3').verbose();
+const md5 = require('md5');
 const path = require('path');
 const ORM = require('./ORM');
 
@@ -8,11 +9,8 @@ class DB {
         
         this.db = new sqlite3.Database(path.join(__dirname, NAME));
         this.orm = new ORM(this.db);
-        setTimeout(() => this.insert({nick: 'OOOOOO', hash: 'asdasd', socket_id: 'asdasdawd'}), 2500);
-        /* this.mediator.subscribe(this.mediator.EVENTS.USER_REGISTRATION, (data) => this.registration(data));
-        this.mediator.set(this.mediator.TRIGGERS.GET_USER_BY_NICK, nick => this._getUserByNick(nick));
-        this.mediator.set(this.mediator.TRIGGERS.GET_USER_BY_ID, id => this._getUserById(id));
-        this.mediator.set(this.mediator.TRIGGERS.LOGIN, data => this.login(data)); */
+
+        setTimeout(() => {})
     }
 
     destructor() {
@@ -20,20 +18,6 @@ class DB {
           this.db.close();
           this.db = null;   
         }
-    }
-
-    login({id,nick}){
-        new Promise(resolve => {
-            this.db.serialize(() => {
-                const query = "UPDATE users SET socket_id=? WHERE nick=?";
-                this.db.get(
-                    query,
-                    [id, nick],
-                    (err, row) => resolve(err ? null : row)
-                );
-            });
-        });
-        return this._getUserByNick(nick);
     }
 
     _getUserById(socket_id) {
@@ -45,29 +29,22 @@ class DB {
         console.log(a);
     }
 
-    async deleteUser(params){
-        let a = await this.orm.delete('users', params);
-        console.log(a);
+    async registration(data = {}, socket){
+        const status = await this.orm.insert('users', data);
+        socket.emit(this.SOCKET.REGISTRATION, {status});
     }
 
-    async changeParam(setParams, whereParams){
-        let a = await this.orm.update('users', whereParams, setParams);
-        console.log(a);
+    async login(data = {}, socket){
+        const { nick, hash, rand } = data;
+        const user = await this.db._getUserByNick(nick);
+        let status = false;
+        if (user && hash === md5(user.hash + rand)){
+            this.users[socket.id] = user;
+            status = true;
+        }
+        socket.emit(this.SOCKET.LOGIN, {status});
     }
 
-    async insert(params){
-        let a = await this.orm.insert('users', params);
-        console.log(a);
-    }
-
-    registration({nick, hash, id}){
-        return new Promise(resolve=> {
-            this.db.serialize(() =>{
-                const query = "INSERT INTO users (nick, hash, socket_id) VALUES (?, ?, ?)";
-                this.db.run(query, [nick, hash, id], (err, row) => resolve(err ? null : row));
-            });
-        });
-    }
 }
 
 module.exports = DB;

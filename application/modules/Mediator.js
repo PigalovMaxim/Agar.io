@@ -1,12 +1,21 @@
 class Mediator {
-    constructor({ EVENTS, TRIGGERS }) {
+    constructor({ EVENTS, TRIGGERS }, SOCKETS ) {
         this.events = {}; // список событий
         this.triggers = {}; // список получателей данных
         this.EVENTS = EVENTS; // названия событий
+        this.SOCKETS = SOCKETS; // названия сокетов
         this.TRIGGERS = TRIGGERS; // названия получателей данных
         Object.values(this.EVENTS).forEach(value => this.events[value] = []);
         Object.values(this.TRIGGERS)
             .forEach(value => this.triggers[value] = () => null);
+    }
+
+    /******************/
+    /* about sockets */
+    /******************/
+
+    getSocketTypes() {
+        return this.SOCKETS;
     }
 
     /******************/
@@ -53,6 +62,7 @@ class Mediator {
             });
         }
     }
+    
 }
 
 module.exports = Mediator;
