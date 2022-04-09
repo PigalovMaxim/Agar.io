@@ -4,7 +4,7 @@ class BaseModule {
         this.db = db;
         this.mediator = mediator;
         this.TRIGGERS = mediator.getTriggerTypes();
-        this.SOCKET = mediator.getSocketTypes();
+        this.SOCKETS = mediator.getSocketTypes();
         this.EVENTS = mediator.getEventTypes();
     }
 }

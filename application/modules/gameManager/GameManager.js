@@ -1,9 +1,9 @@
 const BaseModule = require('../BaseModule');
+const UserManager = require('../userManager/UserManager');
 
 class GameManager extends BaseModule {
     constructor(options) {
         super(options);
-        this.io = options.io;
         this.players = [];
         this.window = {width: 3000, height: 3000};
         this.camera = {width: 1200, height: 600};
@@ -11,12 +11,12 @@ class GameManager extends BaseModule {
         this._createFood();
 
         this.io.on('connection', socket => {
-            socket.on(options.SOCKET.MOVE, data => this.move(data, socket.id));
-            socket.on(options.SOCKET.JOIN, response => this.join(response, socket.id));
-            socket.on(options.SOCKET.EAT_FOOD, index => this.eatFood(index, socket.id));
-            socket.on(options.SOCKET.EAT_PLAYER, eatedId => this.eatPlayer(eatedId, socket.id));
-            socket.on(options.SOCKET.GET_SCENE, () => this.getScene());
-            socket.on(options.SOCKET.INCREASE_SIZE, (score, radius, speed) => this.increaseSize(socket.id, score, radius, speed));
+            socket.on(this.SOCKETS.MOVE, data => this.move(data, socket.id));
+            socket.on(this.SOCKETS.JOIN, () => this.join(socket.id));
+            socket.on(this.SOCKETS.EAT_FOOD, index => this.eatFood(index, socket.id));
+            socket.on(this.SOCKETS.EAT_PLAYER, eatedId => this.eatPlayer(eatedId, socket.id));
+            socket.on(this.SOCKETS.GET_SCENE, () => this.getScene());
+            socket.on(this.SOCKETS.INCREASE_SIZE, (score, radius, speed) => this.increaseSize(socket.id, score, radius, speed));
         });
 
         this.mustUpdate = true;
@@ -80,30 +80,23 @@ class GameManager extends BaseModule {
         this.mustUpdate = true;
     }
 
-    join(response, id) {
-        this.mediator.get(this.mediator.TRIGGERS.GET_USER_BY_ID, id).then(user=> {
-            const player = { 
-                id: id, 
-                nick: user.nick, 
-                x: Math.round(Math.random()*this.window.width), 
-                y: Math.round(Math.random()*this.window.height), 
-                score: 0,
-                radius: 25, 
-                color: this._generateColor(), 
-                speed: 3
-            };     
-            this.players.push(player);
-            this.mustUpdate = true;
-            response({ 
-                status: true,
-                window: this.window,
-                camera: this.camera,
-            });
-        });
+    join(socketId) {
+        const user = this.db.getUserById(socketId);
+        if(!user) return;
+        const player = { 
+            id: user.id, 
+            nick: user.nick, 
+            x: Math.round(Math.random()*this.window.width), 
+            y: Math.round(Math.random()*this.window.height), 
+            score: 0,
+            radius: 25, 
+            color: this._generateColor(), 
+            speed: 3
+        };
+        this.players.push(player);
+        this.mustUpdate = true;
     }
-
     
-
     move(data, id) {
         const { x, y }  = data;
         this.players.forEach( (player) => {
