@@ -5,12 +5,15 @@ class UserManager extends BaseModule {
     constructor(options) {
         super(options);
 
+        
+
         this.io.on('connection', socket => {
-            socket.on(this.SOCKET.REGISTRATION, (data) => this.registration(data, socket));
-            socket.on(this.SOCKET.LOGIN, (data) => this.login(data, socket));
+            socket.on(this.SOCKETS.REGISTRATION, (data) => this.registration(data, socket));
+            socket.on(this.SOCKETS.LOGIN, (data) => this.login(data, socket));
         }); 
     }
-
+    
+   
     registration(data, socket){
         this.db.registration(data, socket);
     }
