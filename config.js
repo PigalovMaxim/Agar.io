@@ -11,11 +11,12 @@ const CONFIG = {
         },
         TRIGGERS: {
             GET_USER_BY_NICK: 'GET_USER_BY_NICK',
+            GET_USER_BY_TOKEN: 'GET_USER_BY_TOKEN',
             GET_USER_BY_ID: 'GET_USER_BY_ID',
             LOGIN: 'LOGIN',
         }
     },   
-    SOCKET: {
+    SOCKETS: {
         CONNECTION: 'connection',
         DISCONNECT: 'disconnect',
         REGISTRATION: 'registration',

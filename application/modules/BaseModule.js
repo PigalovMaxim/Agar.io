@@ -1,5 +1,5 @@
 class BaseModule {
-    constructor({ mediator, io, db, SOCKET}) {
+    constructor({ mediator, io, db}) {
         this.io = io;
         this.db = db;
         this.mediator = mediator;

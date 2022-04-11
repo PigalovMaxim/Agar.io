@@ -80,8 +80,8 @@ class GameManager extends BaseModule {
         this.mustUpdate = true;
     }
 
-    join(socketId) {
-        const user = this.db.getUserById(socketId);
+    join(token) {
+        const user = this.mediator.get(this.mediator.TRIGGERS.GET_USER_BY_TOKEN, token);
         if(!user) return;
         const player = { 
             id: user.id, 
