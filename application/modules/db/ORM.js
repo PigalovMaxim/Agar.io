@@ -78,20 +78,22 @@ class ORM {
         });
     }
 
-    insert(table, params = {}) {
+    insert(table, whereParams = {}, params = {}, operand = 'AND') {
         return new Promise(resolve => {
             this.db.serialize(() => {
+                const whereStr = Object.keys(whereParams).map(key => `${key}=?`).join(` ${operand} `);
+                const whereArr = Object.values(whereParams);
                 const str = Object.keys(params).join(`, `);
                 const arr = Object.values(params);
                 const questionMarks = [];
                 arr.forEach(a => questionMarks.push('?'));
                 const query = `
                     INSERT INTO ${table} (${str})
-                    ${arr.length === 0 ? '' : `VALUES (${questionMarks.join(', ')})`}`;
-                    console.log(query);
+                    ${arr.length === 0 ? '' : `VALUES (${questionMarks.join(', ')})`}
+                    ${whereStr.length === 0 ? '' : `WHERE ${whereStr}`}`;
                 this.db.run(
                     query,
-                    arr,
+                    [arr, whereArr],
                     (err) => resolve(!err)
                 );
             });
