@@ -6,11 +6,10 @@ class UserManager extends BaseModule {
         super(options);
 
         this.users = {};
-        console.log(this.SOCKETS);
         this.io.on(this.SOCKETS.CONNECTION, socket => {
             socket.on(this.SOCKETS.REGISTRATION, (data) => this.registration(data, socket));
             socket.on(this.SOCKETS.LOGIN, (data) => this.login(data, socket));
-            socket.on(this.SOCKETS.DISCONNECT);
+            socket.on(this.SOCKETS.DISCONNECT, () => this.disconnect(socket.id));
         });
 
         this.mediator.set(this.mediator.TRIGGERS.GET_USER_BY_TOKEN, token => this.getUserByToken(token));
@@ -18,6 +17,7 @@ class UserManager extends BaseModule {
 
 
     disconnect(socketId){
+        if(!this.users[socketId]) return;
         const nick = this.users[socketId].nick;
         delete this.users[socketId];
         this.db.disconnect(nick);
@@ -26,9 +26,10 @@ class UserManager extends BaseModule {
    
     getUserByToken(token){
         const keys = Object.keys(this.users);
-        for(let i = 0; i < keys.length; i++)
+        for(let i = 0; i < keys.length; i++){
             if(this.users[keys[i]].token === token) 
-                return this.users[keys[i]];   
+                return this.users[keys[i]]; 
+        } 
     }
 
     getUserById(id){
