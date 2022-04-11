@@ -41,7 +41,8 @@ class DB {
         const { nick, hash } = data;
         let token = md5(hash);
         const status  = await this.orm.update('users', {nick}, {token});
-        return {status, token};
+        if(!status) return null;
+        return token;
     }
 
     async login(data = {}, socket){
@@ -50,8 +51,9 @@ class DB {
         let token = null;
         let status = false;
         if (user && hash === md5(user.hash + rand)){
+            token = await this._generateToken(data);
+            user.token = token;
             users[socket.id] = user;
-            token = this._generateToken(data);
             status = true;
         }
         socket.emit(this.mediator.SOCKETS.LOGIN, {status, token});
