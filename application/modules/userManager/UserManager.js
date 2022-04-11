@@ -37,7 +37,7 @@ class UserManager extends BaseModule {
     }
 
     registration(data, socket){
-        this.db.registration(data, socket);
+        this.db.registration(data, this.users, socket);
     }
 
     login(data, socket) {

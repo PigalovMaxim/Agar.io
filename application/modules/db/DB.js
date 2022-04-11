@@ -10,10 +10,6 @@ class DB {
 
         this.db = new sqlite3.Database(path.join(__dirname, NAME));
         this.orm = new ORM(this.db);
-
-        /* setTimeout(() => {
-            this.getUserByNick('nigga');
-        },1500) */
     }
 
     disconnect(nick){
@@ -32,9 +28,17 @@ class DB {
         return user;
     }
 
-    async registration(data = {}, socket){
+    async registration(data = {}, users, socket){
+        token = await this._generateToken(data);
         const status = await this.orm.insert('users', data);
-        socket.emit(this.mediator.SOCKETS.REGISTRATION, {status});
+        const user = {
+            id: 0,
+            nick: data.nick,
+            hash: data.hash,
+            token
+        };
+        users[socket.id] = user;
+        socket.emit(this.mediator.SOCKETS.REGISTRATION, {status, token});
     }
 
     async _generateToken(data){

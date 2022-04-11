@@ -11,11 +11,11 @@ class GameManager extends BaseModule {
         this._createFood();
 
         this.io.on('connection', socket => {
-            socket.on(this.SOCKETS.MOVE, data => this.move(data, socket.id));
+            socket.on(this.SOCKETS.MOVE, data => this.move(data));
             socket.on(this.SOCKETS.JOIN, token => this.join(token, socket));
             socket.on(this.SOCKETS.EAT_FOOD, data => this.eatFood(data, socket.id));
             socket.on(this.SOCKETS.EAT_PLAYER, data => this.eatPlayer(data, socket.id));
-            socket.on(this.SOCKETS.INCREASE_SIZE, (score, radius, speed, token) => this.increaseSize(socket.id, score, radius, speed, token));
+            socket.on(this.SOCKETS.INCREASE_SIZE, (score, radius, speed, token) => this.increaseSize(score, radius, speed, token));
         });
 
         this.mustUpdate = true;
@@ -58,11 +58,11 @@ class GameManager extends BaseModule {
         this.mustUpdate = true;
     }
 
-    increaseSize(id, score, radius, speed, token) {
+    increaseSize(score, radius, speed, token) {
         const user = this.mediator.get(this.mediator.TRIGGERS.GET_USER_BY_TOKEN, token);
         if(!user) return;
         this.players.forEach((player, i) => {
-            if(player.id === id){
+            if(player.id === user.id){
                 player.score = score;
                 player.radius = radius;
                 player.speed = speed;
@@ -74,11 +74,9 @@ class GameManager extends BaseModule {
     eatPlayer({eatedId, token}){
         const user = this.mediator.get(this.mediator.TRIGGERS.GET_USER_BY_TOKEN, token);
         if(!user) return;
-        let eatedPlayer = null;
         this.players.forEach((player, i) => {
             if(player.id === eatedId){
                 this.io.to(eatedId).emit('death');
-                eatedPlayer = player;
                 this.players.splice(i, 1);
             }
         });
@@ -87,7 +85,6 @@ class GameManager extends BaseModule {
 
     join(token, socket) {
         const user = this.mediator.get(this.mediator.TRIGGERS.GET_USER_BY_TOKEN, token);
-        console.log(user);
         if(!user) return;
         const player = { 
             id: user.id, 
@@ -101,15 +98,15 @@ class GameManager extends BaseModule {
         };
         this.players.push(player);
         this.mustUpdate = true;
-        socket.emit(this.SOCKETS.JOIN, {status: true});
+        socket.emit(this.SOCKETS.JOIN, {status: true, window: this.window, camera: this.camera, id: user.id});
     }
     
-    move(data, id) {
+    move(data) {
         const { x, y, token}  = data;
         const user = this.mediator.get(this.mediator.TRIGGERS.GET_USER_BY_TOKEN, token);
         if(!user) return;
         this.players.forEach( (player) => {
-            if(player.id == id){
+            if(player.id == user.id){
                 player.x += x;
                 player.y += y;
                 if(player.x >= this.window.width) player.x = this.window.width;
