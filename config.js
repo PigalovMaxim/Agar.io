@@ -14,6 +14,7 @@ const CONFIG = {
             GET_USER_BY_TOKEN: 'GET_USER_BY_TOKEN',
             GET_USER_BY_ID: 'GET_USER_BY_ID',
             LOGIN: 'LOGIN',
+            DISCONNECT: 'disconnect',
         }
     },   
     SOCKETS: {

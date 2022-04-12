@@ -1,7 +1,6 @@
 const sqlite3 = require('sqlite3').verbose();
 const md5 = require('md5');
 const path = require('path');
-const { disconnect } = require('process');
 const ORM = require('./ORM');
 
 class DB {
@@ -28,16 +27,9 @@ class DB {
         return user;
     }
 
-    async registration(data = {}, users, socket){
-        token = await this._generateToken(data);
+    async registration(data = {}, socket){
+        const token = await this._generateToken(data);
         const status = await this.orm.insert('users', data);
-        const user = {
-            id: 0,
-            nick: data.nick,
-            hash: data.hash,
-            token
-        };
-        users[socket.id] = user;
         socket.emit(this.mediator.SOCKETS.REGISTRATION, {status, token});
     }
 
@@ -61,6 +53,7 @@ class DB {
             status = true;
         }
         socket.emit(this.mediator.SOCKETS.LOGIN, {status, token});
+        return status;
     }
 
 }

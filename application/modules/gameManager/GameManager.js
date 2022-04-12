@@ -1,5 +1,4 @@
 const BaseModule = require('../BaseModule');
-const UserManager = require('../userManager/UserManager');
 
 class GameManager extends BaseModule {
     constructor(options) {
@@ -16,10 +15,15 @@ class GameManager extends BaseModule {
             socket.on(this.SOCKETS.EAT_FOOD, data => this.eatFood(data, socket.id));
             socket.on(this.SOCKETS.EAT_PLAYER, data => this.eatPlayer(data, socket.id));
             socket.on(this.SOCKETS.INCREASE_SIZE, (score, radius, speed, token) => this.increaseSize(score, radius, speed, token));
+            socket.on(this.SOCKETS.DISCONNECT, () => this.disconnect(socket.id));
         });
 
         this.mustUpdate = true;
         this.start();
+    }
+
+    disconnect(id){
+        this.mediator.get(this.TRIGGERS.DISCONNECT, id);
     }
 
     _createFood(){
