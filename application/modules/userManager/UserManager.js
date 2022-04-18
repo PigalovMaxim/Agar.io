@@ -39,17 +39,14 @@ class UserManager extends BaseModule {
     }
 
     async registration(data, socket) {
-        const { nick, hash } = data;
         let status = false;
-        let token = '';
-        if(nick !== await this.db.getUserByNick({ nick })){
+        const user = new User(this.db);
+        if(await user.registration(data)){
             status = true;
-            token  = this.db._generateToken({ nick, hash });
-            this.db.registration(data, socket);
-            socket.emit(this.SOCKETS.REGISTRATION,{ status, token });
+            socket.emit(this.SOCKETS.REGISTRATION,{ status, token: user.token });
             return;
         }
-        socket.emit(this.SOCKETS.REGISTRATION,{ status, token });
+        socket.emit(this.SOCKETS.REGISTRATION,{ status, token: null });
     }
 
     async login(data = {}, socket) {
@@ -60,7 +57,7 @@ class UserManager extends BaseModule {
         if (nick && hash && rand-0) {
             // 2. создать юзверя
             const user = new User(this.db);
-            token  = this.db._generateToken({ nick, hash });
+            token  = await this.db._generateToken({ nick, hash });
             // 3. попытаццо авторизоваться юзверя
             if (await user.login(nick, hash, rand, token)) {
                 this.users[user.token] = user; // 4. если ок, то добавить в юзверей
