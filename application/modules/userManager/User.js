@@ -1,9 +1,10 @@
+const md5 = require('md5');
 class User {
     constructor(db) {
         // data
         this.id; // id from DB
         this.nick;
-        this.guid;
+        this.hash;
         this.token;
         this.socketId;
         // support
@@ -13,24 +14,29 @@ class User {
     get() {
         return {
             nick: this.nick,
-            guid: this.guid
+            hash: this.hash
         }
     }
 
     getSelf() {
         return {
             nick: this.nick,
-            guid: this.guid
+            hash: this.hash,
         }
     }
 
-    login(nick, hash, rand, socketId) {
-        // убрать это говно
-        return this.db.login({
-            nick: this.nick,
-            hash: this.hash,
-            rand: this.rand,
-            users
-        }, socket);
+    logout(){
+        this.db.disconnect(this.nick);
+    }
+
+    async login(nick, hash, rand, token, socketId) {
+        this.nick = nick;
+        this.token = token;
+        this.socketId = socketId;
+        const user = await this.db.getUserByNick(nick);
+        if(user && md5(user.hash + rand) === hash) return true;
+        return false;
     }
 }
+
+module.exports = User;
