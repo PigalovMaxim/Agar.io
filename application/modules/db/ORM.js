@@ -88,7 +88,6 @@ class ORM {
                 const query = `
                     INSERT INTO ${table} (${str})
                     ${arr.length === 0 ? '' : `VALUES (${questionMarks.join(', ')})`}`;
-                console.log(query);
                 this.db.run(
                     query,
                     arr,

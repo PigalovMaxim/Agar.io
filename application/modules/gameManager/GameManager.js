@@ -52,7 +52,7 @@ class GameManager extends BaseModule {
                 this.mustUpdate = false;
                 this.io.emit('getScene', this.getScene()); 
             }
-        }, 100);
+        }, 15);
     } 
     
     eatFood({index, token}){
@@ -89,6 +89,7 @@ class GameManager extends BaseModule {
 
     join(token, socket) {
         const user = this.mediator.get(this.mediator.TRIGGERS.GET_USER_BY_TOKEN, token);
+        console.log(token, user);
         if(!user) return;
         const player = { 
             id: user.id, 

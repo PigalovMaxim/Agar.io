@@ -19,10 +19,10 @@ class UserManager extends BaseModule {
 
 
     disconnect(socketId) {
-        if (!this.users[socketId]) return;
-        const nick = this.users[socketId].nick;
-        delete this.users[socketId];
-        this.db.disconnect(nick);
+        let user = Object.values(this.users).find(user => user.socketId === socketId);
+        if (!user) return;
+        user.logout();
+        delete this.users[user.token];
     }
 
 
@@ -38,32 +38,40 @@ class UserManager extends BaseModule {
         return this.users[id] ? this.users[id] : null;
     }
 
-    registration(data, socket) {
-        this.db.registration(data, socket);
+    async registration(data, socket) {
+        const { nick, hash } = data;
+        let status = false;
+        let token = '';
+        if(nick !== await this.db.getUserByNick({ nick })){
+            status = true;
+            token  = this.db._generateToken({ nick, hash });
+            this.db.registration(data, socket);
+            socket.emit(this.SOCKETS.REGISTRATION,{ status, token });
+            return;
+        }
+        socket.emit(this.SOCKETS.REGISTRATION,{ status, token });
     }
 
     async login(data = {}, socket) {
         // 1. проверить полноту прилетевших данных
         const { nick, hash, rand } = data;
+        let status = false;
+        let token = '';
         if (nick && hash && rand-0) {
             // 2. создать юзверя
             const user = new User(this.db);
+            token  = this.db._generateToken({ nick, hash });
             // 3. попытаццо авторизоваться юзверя
-            if (await user.login(nick, hash, rand, socket.id)) {
-                this.users[user.guid] = user; // 4. если ок, то добавить в юзверей
+            if (await user.login(nick, hash, rand, token)) {
+                this.users[user.token] = user; // 4. если ок, то добавить в юзверей
                 // 5. ответить клиенту
-                // user.getSelf()
+                status = true;
+                socket.emit(this.SOCKETS.LOGIN, {status, token});
+                user.getSelf();
             }
         }
+        socket.emit(this.SOCKETS.LOGIN, {status, token});
     }
-
-    /* login(data, socket) {
-        data['users'] = this.users;
-        console.log(data);
-        this.db.login(data, socket);
-    } */
-
-
 }
 
 module.exports = UserManager;

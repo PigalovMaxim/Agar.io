@@ -27,10 +27,8 @@ class DB {
         return user;
     }
 
-    async registration(data = {}, socket){
-        const token = await this._generateToken(data);
-        const status = await this.orm.insert('users', data);
-        socket.emit(this.mediator.SOCKETS.REGISTRATION, {status, token});
+    async registration(data = {}){
+        await this.orm.insert('users', data);
     }
 
     async _generateToken(data){
@@ -40,22 +38,6 @@ class DB {
         if(!status) return null;
         return token;
     }
-
-    async login(data = {}, socket){
-        const { nick, hash, rand, users } = data;
-        const user = await this.getUserByNick(nick);
-        let token = null;
-        let status = false;
-        if (user && hash === md5(user.hash + rand)){
-            token = await this._generateToken(data);
-            user.token = token;
-            users[socket.id] = user;
-            status = true;
-        }
-        socket.emit(this.mediator.SOCKETS.LOGIN, {status, token});
-        return status;
-    }
-
 }
 
 module.exports = DB;
