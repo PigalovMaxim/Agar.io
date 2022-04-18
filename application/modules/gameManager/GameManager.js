@@ -89,8 +89,8 @@ class GameManager extends BaseModule {
 
     join(token, socket) {
         const user = this.mediator.get(this.mediator.TRIGGERS.GET_USER_BY_TOKEN, token);
-        console.log(token, user);
         if(!user) return;
+        if(this.players.find(player => player.id === user.id)) return;
         const player = { 
             id: user.id, 
             nick: user.nick, 

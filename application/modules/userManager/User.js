@@ -37,6 +37,16 @@ class User {
         if(user && md5(user.hash + rand) === hash) return true;
         return false;
     }
+
+    async registration(data) {
+        const { nick, hash } = data;
+        if(nick !== await this.db.getUserByNick({ nick })){
+            this.token  = await this.db._generateToken({ nick, hash });
+            this.db.registration(data);
+            return true;
+        }
+        return false;
+    }
 }
 
 module.exports = User;
