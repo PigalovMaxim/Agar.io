@@ -8,7 +8,6 @@ class UserManager extends BaseModule {
         this.users = {};
         this.io.on(this.SOCKETS.CONNECTION, socket => {
             socket.on(this.SOCKETS.REGISTRATION, (data) => this.registration(data, socket));
-            //socket.on(this.SOCKETS.LOGIN, (data) => this.login(data, socket));
             socket.on(this.SOCKETS.LOGIN, (data) => this.login(data, socket));
             socket.on(this.SOCKETS.DISCONNECT, () => this.disconnect(socket.id));
         });
@@ -17,13 +16,12 @@ class UserManager extends BaseModule {
     }
 
 
-    disconnect(socketId) {
+    async disconnect(socketId) {
         let user = Object.values(this.users).find(user => user.socketId === socketId);
         if (!user) return;
-        user.logout();
-        delete this.users[user.token];
+        await user.logout();
+        delete this.users[user.guid];
     }
-
 
     getUserByToken(token) {
         const keys = Object.keys(this.users);
@@ -33,39 +31,28 @@ class UserManager extends BaseModule {
         }
     }
 
-    async registration(data, socket) {
-        let status = false;
-        const user = new User(this.db);
-        if(await user.registration({ ...data, socketId: socket.id})){
-            status = true;
-            user.id = Object.keys(this.users).length;
-            this.users[user.token] = user;
-            socket.emit(this.SOCKETS.REGISTRATION,{ status, token: user.token });
-            return;
+    async registration(data = {}, socket) {
+        const { nick, hash } = data;
+        if (nick && hash) {
+            const user = new User(this.db, this.common);
+            if (await user.registration(nick, hash, socket.id)) {
+                this.users[user.guid] = user;
+                return socket.emit(this.SOCKETS.REGISTRATION, user.getSelf());
+            }
         }
-        socket.emit(this.SOCKETS.REGISTRATION,{ status, token: null });
+        socket.emit(this.SOCKETS.REGISTRATION, false);
     }
 
     async login(data = {}, socket) {
-        // 1. проверить полноту прилетевших данных
         const { nick, hash, rand } = data;
-        let status = false;
-        let token = '';
-        if (nick && hash && rand-0) {
-            // 2. создать юзверя
-            const user = new User(this.db);
-            token  = await this.db._generateToken({ nick, hash });
-            // 3. попытаццо авторизоваться юзверя
-            if (await user.login(nick, hash, rand, token, socket.id)) {
-                user.id = Object.keys(this.users).length;
-                this.users[user.token] = user; // 4. если ок, то добавить в юзверей
-                // 5. ответить клиенту
-                status = true;
-                socket.emit(this.SOCKETS.LOGIN, {status, token});
-                user.getSelf();
+        if (nick && hash && rand - 0) {
+            const user = new User(this.db, this.common);
+            if (await user.login(nick, hash, rand, socket.id)) {
+                this.users[user.guid] = user;
+                return socket.emit(this.SOCKETS.LOGIN, user.getSelf());
             }
         }
-        socket.emit(this.SOCKETS.LOGIN, {status, token});
+        socket.emit(this.SOCKETS.LOGIN, false);
     }
 }
 

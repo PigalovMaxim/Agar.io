@@ -1,52 +1,63 @@
-const md5 = require('md5');
 class User {
-    constructor(db) {
-        // data
+    constructor(db, common) {
+        // data from DB
         this.id; // id from DB
+        this.guid;
         this.nick;
-        this.hash;
         this.token;
+        // other data
         this.socketId;
         // support
         this.db = db;
+        this.common = common;
     }
 
     get() {
         return {
             nick: this.nick,
-            hash: this.hash
         }
     }
 
     getSelf() {
         return {
+            guid: this.guid,
             nick: this.nick,
-            hash: this.hash,
         }
     }
 
-    logout(){
-        this.db.disconnect(this.nick);
-    }
-
-    async login(nick, hash, rand, token, socketId) {
+    _init({ id, guid, nick }, token, socketId) {
+        this.id = id;
+        this.guid = guid;
         this.nick = nick;
         this.token = token;
         this.socketId = socketId;
+    }
+
+    logout() {
+        this.db.disconnect(this.nick);
+    }
+
+    async login(nick, hash, rand, socketId) {
         const user = await this.db.getUserByNick(nick);
-        if(user && md5(user.hash + rand) === hash) return true;
+        if (user && this.common.getMD5(user.hash + rand) === hash) {
+            const token = this.common.genHash(nick + hash);
+            await this.db.setToken(user.id, token);
+            this._init(user, token, socketId);
+            return true;
+        }
         return false;
     }
 
-    async registration(data) {
-        const { nick, hash, socketId } = data;
-        const dbUser = await this.db.getUserByNick(nick);
-        if(!dbUser){
-            this.token  = await this.db._generateToken({ nick, hash });
-            this.nick = nick;
-            this.socketId = socketId;
-            this.db.registration(data);
-            return true;
+    async registration(nick, hash, socketId) {
+        let user = await this.db.getUserByNick(nick);
+        if (!user) {
+            await this.db.registration({ nick, hash });
+            user = await this.db.getUserByNick(nick);
+            if (user) {
+                if (await this.login(nick, hash, this.common.random(), socketId)) {
+                    return true;
+                }
+            }
         }
         return false;
     }

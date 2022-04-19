@@ -40,7 +40,6 @@ class ORM {
         });
     }
 
-
     delete(tables, params = {}, operand = 'AND') {
         return new Promise(resolve => {
             this.db.serialize(() => {

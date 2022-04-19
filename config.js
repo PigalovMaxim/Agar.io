@@ -1,6 +1,6 @@
 const CONFIG = {
-    NAME: 'Eat Worker',
-    VERSION: '0.0.1',
+    NAME: 'Oval.io',
+    VERSION: '1.0.0',
     PORT: 3001,
     
     MEDIATOR: {
