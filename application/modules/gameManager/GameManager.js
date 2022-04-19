@@ -23,7 +23,15 @@ class GameManager extends BaseModule {
     }
 
     disconnect(id){
-        this.mediator.get(this.TRIGGERS.DISCONNECT, id);
+        let index = null;
+        const user = this.players.find((user, i) => {
+            if(user.socketId === id){
+                index = i;
+                return user;
+            }
+        });
+        if (!user) return;
+        this.players.splice(index, 1);
     }
 
     _createFood(){
@@ -80,7 +88,7 @@ class GameManager extends BaseModule {
         if(!user) return;
         this.players.forEach((player, i) => {
             if(player.id === eatedId){
-                this.io.to(eatedId).emit('death');
+                this.io.to(player.socketId).emit('death');
                 this.players.splice(i, 1);
             }
         });
@@ -93,6 +101,7 @@ class GameManager extends BaseModule {
         if(this.players.find(player => player.id === user.id)) return;
         const player = { 
             id: user.id, 
+            socketId: socket.id,
             nick: user.nick, 
             x: Math.round(Math.random()*this.window.width), 
             y: Math.round(Math.random()*this.window.height), 
@@ -124,8 +133,7 @@ class GameManager extends BaseModule {
     }
 
     getScene(){
-        const food = this.foods;
-        return { status: true, players: this.players, food };
+        return { status: true, players: this.players, food: this.foods };
     }
 }
 

@@ -14,7 +14,6 @@ class UserManager extends BaseModule {
         });
 
         this.mediator.set(this.mediator.TRIGGERS.GET_USER_BY_TOKEN, token => this.getUserByToken(token));
-        this.mediator.set(this.mediator.TRIGGERS.DISCONNECT, id => this.disconnect(id));
     }
 
 
@@ -34,15 +33,13 @@ class UserManager extends BaseModule {
         }
     }
 
-    getUserById(id) {
-        return this.users[id] ? this.users[id] : null;
-    }
-
     async registration(data, socket) {
         let status = false;
         const user = new User(this.db);
-        if(await user.registration(data)){
+        if(await user.registration({ ...data, socketId: socket.id})){
             status = true;
+            user.id = Object.keys(this.users).length;
+            this.users[user.token] = user;
             socket.emit(this.SOCKETS.REGISTRATION,{ status, token: user.token });
             return;
         }
@@ -59,7 +56,8 @@ class UserManager extends BaseModule {
             const user = new User(this.db);
             token  = await this.db._generateToken({ nick, hash });
             // 3. попытаццо авторизоваться юзверя
-            if (await user.login(nick, hash, rand, token)) {
+            if (await user.login(nick, hash, rand, token, socket.id)) {
+                user.id = Object.keys(this.users).length;
                 this.users[user.token] = user; // 4. если ок, то добавить в юзверей
                 // 5. ответить клиенту
                 status = true;

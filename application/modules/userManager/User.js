@@ -39,9 +39,12 @@ class User {
     }
 
     async registration(data) {
-        const { nick, hash } = data;
-        if(nick !== await this.db.getUserByNick({ nick })){
+        const { nick, hash, socketId } = data;
+        const dbUser = await this.db.getUserByNick(nick);
+        if(!dbUser){
             this.token  = await this.db._generateToken({ nick, hash });
+            this.nick = nick;
+            this.socketId = socketId;
             this.db.registration(data);
             return true;
         }

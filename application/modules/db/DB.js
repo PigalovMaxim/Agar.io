@@ -33,7 +33,7 @@ class DB {
 
     async _generateToken(data){
         const { nick, hash } = data;
-        let token = md5(hash);
+        let token = md5(hash + Math.random() * 100000);
         const status  = await this.orm.update('users', {nick}, {token});
         if(!status) return null;
         return token;
