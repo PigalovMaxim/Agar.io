@@ -32,10 +32,10 @@ class UserManager extends BaseModule {
     }
 
     async registration(data = {}, socket) {
-        const { nick, hash } = data;
-        if (nick && hash) {
+        const { nick, password } = data;
+        if (nick && password) {
             const user = new User(this.db, this.common);
-            if (await user.registration(nick, hash, socket.id)) {
+            if (await user.registration(nick, password, socket.id)) {
                 this.users[user.guid] = user;
                 return socket.emit(this.SOCKETS.REGISTRATION, user.getSelf());
             }
@@ -44,11 +44,12 @@ class UserManager extends BaseModule {
     }
 
     async login(data = {}, socket) {
-        const { nick, hash, rand } = data;
-        if (nick && hash && rand - 0) {
+        const { nick, password, rand } = data;
+        if (nick && password && rand - 0) {
             const user = new User(this.db, this.common);
-            if (await user.login(nick, hash, rand, socket.id)) {
+            if (await user.login(nick, password, rand, socket.id)) {
                 this.users[user.guid] = user;
+                console.log(user);
                 return socket.emit(this.SOCKETS.LOGIN, user.getSelf());
             }
         }

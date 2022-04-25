@@ -37,10 +37,10 @@ class User {
         this.db.disconnect(this.nick);
     }
 
-    async login(nick, hash, rand, socketId) {
+    async login(nick, password, rand, socketId) {
         const user = await this.db.getUserByNick(nick);
-        if (user && this.common.getMD5(user.hash + rand) === hash) {
-            const token = this.common.genHash(nick + hash);
+        if (user && this.common.getMD5(user.password + rand) === password) {
+            const token = this.common.genHash(nick + password);
             await this.db.setToken(user.id, token);
             this._init(user, token, socketId);
             return true;
@@ -48,15 +48,14 @@ class User {
         return false;
     }
 
-    async registration(nick, hash, socketId) {
+    async registration(nick, password, socketId) {
         let user = await this.db.getUserByNick(nick);
-        console.log(nick, hash, user);
         if (!user) {
-            await this.db.registration({ nick, hash });
+            const guid = this.common.guid();
+            await this.db.registration({ nick, password, guid });
             user = await this.db.getUserByNick(nick);
-            console.log('Вторая авторизация > ', user);
             if (user) {
-                if (await this.login(nick, hash, this.common.random(), socketId)) {
+                if (await this.login(nick, password, guid, this.common.random(), socketId)) {
                     return true;
                 }
             }
@@ -66,3 +65,4 @@ class User {
 }
 
 module.exports = User;
+
