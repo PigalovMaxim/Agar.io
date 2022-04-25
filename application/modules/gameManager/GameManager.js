@@ -12,8 +12,8 @@ class GameManager extends BaseModule {
         this.io.on('connection', socket => {
             socket.on(this.SOCKETS.MOVE, data => this.move(data));
             socket.on(this.SOCKETS.JOIN, guid => this.join(guid, socket));
-            socket.on(this.SOCKETS.EAT_FOOD, data => this.eatFood(data, socket.id));
-            socket.on(this.SOCKETS.EAT_PLAYER, guid => this.death(guid, socket.id));
+            socket.on(this.SOCKETS.EAT_FOOD, data => this.eatFood(data));
+            socket.on(this.SOCKETS.DEATH, guid => this.death(guid, socket));
             socket.on(this.SOCKETS.INCREASE_SIZE, (score, radius, speed, guid) => this.increaseSize(score, radius, speed, guid));
             socket.on(this.SOCKETS.DISCONNECT, () => this.disconnect(socket.id));
         });
@@ -24,6 +24,12 @@ class GameManager extends BaseModule {
 
     disconnect(id){
         this.mediator.get(this.TRIGGERS.DISCONNECT, id);
+        this.players.forEach((player, i) => {
+            if(player.socketId === id) {
+                this.players.splice(i, 1);
+                return;
+            }
+        });
     }
 
     _createFood(){
@@ -77,6 +83,7 @@ class GameManager extends BaseModule {
 
     death(guid, socket) {
         this.players.forEach((player, i) => {
+            console.log(player.guid, guid, player.guid === guid);
             if(player.guid === guid){
                 socket.emit('death');
                 this.players.splice(i, 1);
@@ -89,7 +96,7 @@ class GameManager extends BaseModule {
         const user = this.mediator.get(this.mediator.TRIGGERS.GET_USER_BY_GUID, guid);
         if(!user) return;
         if(this.players.find(player => player.guid === user.guid)) return;
-        const player = new Player();
+        const player = new Player(this.window, this._generateColor, socket.id);
         player.init(user.guid, user.nick);
         this.players.push(player.get());
         this.mustUpdate = true;

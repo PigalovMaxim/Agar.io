@@ -25,6 +25,7 @@ const CONFIG = {
         LOGIN: 'login',
         MOVE: 'move',
         JOIN: 'join',
+        DEATH: 'death',
         EAT_FOOD: 'eatFood',
         MESSAGE: 'message',
         INCREASE_SIZE: 'increaseSize'
