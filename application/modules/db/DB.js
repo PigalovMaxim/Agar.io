@@ -30,8 +30,8 @@ class DB {
         await this.orm.insert('users', data);
     }
 
-    async setToken(nick, token) {
-        return await this.orm.update('users', { nick }, { token });
+    async setToken(id, token) {
+        return await this.orm.update('users', { id }, { token });
     }
 }
 
