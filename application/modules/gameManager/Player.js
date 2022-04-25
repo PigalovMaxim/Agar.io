@@ -1,6 +1,7 @@
 class Player {
     constructor() {
         //Data from user
+        this.nick;
         this.guid;
         //Other data
         this.x;
@@ -11,7 +12,9 @@ class Player {
         this.speed;
     }
 
-    _init(){
+    init(guid, nick){
+        this.guid = guid;
+        this.nick = nick;
         this.x = Math.round(Math.random() * this.window.width);
         this.y = Math.round(Math.random() * this.window.height);
         this.score = 0;
@@ -22,6 +25,8 @@ class Player {
 
     get() {
         return {
+            nick: this.nick,
+            guid: this.guid,
             x: this.x,
             y: this.y,
             radius: this.radius,
@@ -31,6 +36,8 @@ class Player {
 
     getSelf(){
         return {
+            nick: this.nick, 
+            guid: this.guid,
             x: this.x,
             y: this.y,
             score: this.score,
@@ -44,7 +51,7 @@ class Player {
 module.exports = Player;
 
 /*
-guid стабильный
-token генерится при логине
-hash меняется при каждом запросе 
+    guid стабильный
+    token генерится при логине
+    hash меняется при каждом запросе 
 */

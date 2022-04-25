@@ -1,20 +1,20 @@
 const BaseModule = require('../BaseModule');
+const Player = require('../gameManager/Player');
 
 class GameManager extends BaseModule {
     constructor(options) {
         super(options);
         this.players = [];
-        this.window = { width: 3000, height: 3000 };
-        this.camera = { width: 1200, height: 600 };
+        this.window = {width: 3000, height: 3000};
         this.foods = [];
         this._createFood();
 
         this.io.on('connection', socket => {
             socket.on(this.SOCKETS.MOVE, data => this.move(data));
-            socket.on(this.SOCKETS.JOIN, token => this.join(token, socket));
+            socket.on(this.SOCKETS.JOIN, guid => this.join(guid, socket));
             socket.on(this.SOCKETS.EAT_FOOD, data => this.eatFood(data, socket.id));
             socket.on(this.SOCKETS.EAT_PLAYER, data => this.eatPlayer(data, socket.id));
-            socket.on(this.SOCKETS.INCREASE_SIZE, (score, radius, speed, token) => this.increaseSize(score, radius, speed, token));
+            socket.on(this.SOCKETS.INCREASE_SIZE, (score, radius, speed, guid) => this.increaseSize(score, radius, speed, guid));
             socket.on(this.SOCKETS.DISCONNECT, () => this.disconnect(socket.id));
         });
 
@@ -22,22 +22,14 @@ class GameManager extends BaseModule {
         this.start();
     }
 
-    disconnect(id) {
-        let index = null;
-        const user = this.players.find((user, i) => {
-            if (user.socketId === id) {
-                index = i;
-                return user;
-            }
-        });
-        if (!user) return;
-        this.players.splice(index, 1);
+    disconnect(id){
+        this.mediator.get(this.TRIGGERS.DISCONNECT, id);
     }
 
-    _createFood() {
-        for (let i = 0; i < Math.round(this.window.width / 3); i++) {
+    _createFood(){
+        for(let i = 0; i < Math.round(this.window.width/3); i++){
             const food = {
-                x: Math.round(Math.random() * this.window.width),
+                x: Math.round(Math.random() * this.window.width), 
                 y: Math.round(Math.random() * this.window.height)
             };
             this.foods.push(food);
@@ -45,11 +37,11 @@ class GameManager extends BaseModule {
         this.mustUpdate = true;
     }
 
-    _generateColor() {
+    _generateColor(){
         let letters = '0123456789ABCDEF';
         let color = '#';
         for (let i = 0; i < 6; i++) {
-            color += letters[Math.floor(Math.random() * 16)];
+          color += letters[Math.floor(Math.random() * 16)];
         }
         return color;
     }
@@ -58,23 +50,23 @@ class GameManager extends BaseModule {
         setInterval(() => {
             if (this.mustUpdate) {
                 this.mustUpdate = false;
-                this.io.emit('getScene', this.getScene());
+                this.io.emit('getScene', this.getScene()); 
             }
-        }, 2);
-    }
-
-    eatFood({ index, token }) {
-        const user = this.mediator.get(this.mediator.TRIGGERS.GET_USER_BY_TOKEN, token);
-        if (!user) return;
+        }, 15);
+    } 
+    
+    eatFood({index, guid}){
+        const user = this.mediator.get(this.mediator.TRIGGERS.GET_USER_BY_GUID, guid);
+        if(!user) return;
         this.foods.splice(index, 1);
         this.mustUpdate = true;
     }
 
-    increaseSize(score, radius, speed, token) {
-        const user = this.mediator.get(this.mediator.TRIGGERS.GET_USER_BY_TOKEN, token);
-        if (!user) return;
+    increaseSize(score, radius, speed, guid) {
+        const user = this.mediator.get(this.mediator.TRIGGERS.GET_USER_BY_GUID, guid);
+        if(!user) return;
         this.players.forEach((player, i) => {
-            if (player.id === user.id) {
+            if(player.id === user.id){
                 player.score = score;
                 player.radius = radius;
                 player.speed = speed;
@@ -83,57 +75,49 @@ class GameManager extends BaseModule {
         this.mustUpdate = true;
     }
 
-    eatPlayer({ eatedId, token }) {
-        const user = this.mediator.get(this.mediator.TRIGGERS.GET_USER_BY_TOKEN, token);
-        if (!user) return;
+    eatPlayer({eatedId, guid}){
+        const user = this.mediator.get(this.mediator.TRIGGERS.GET_USER_BY_GUID, guid);
+        if(!user) return;
         this.players.forEach((player, i) => {
-            if (player.id === eatedId) {
-                this.io.to(player.socketId).emit('death');
+            if(player.id === eatedId){
+                this.io.to(eatedId).emit('death');
                 this.players.splice(i, 1);
             }
         });
         this.mustUpdate = true;
     }
 
-    join(token, socket) {
-        const user = this.mediator.get(this.mediator.TRIGGERS.GET_USER_BY_TOKEN, token);
-        if (!user) return;
-        if (this.players.find(player => player.id === user.id)) return;
-        const player = {
-            id: user.id, // на guid
-            socketId: socket.id,
-            nick: user.nick,
-            x: Math.round(Math.random() * this.window.width),
-            y: Math.round(Math.random() * this.window.height),
-            score: 0,
-            radius: 25,
-            color: this._generateColor(),
-            speed: 3
-        };
-        this.players.push(player);
+    join(guid, socket) {
+        const user = this.mediator.get(this.mediator.TRIGGERS.GET_USER_BY_GUID, guid);
+        if(!user) return;
+        if(this.players.find(player => player.id === user.id)) return;
+        const player = new Player();
+        player.init(user.guid, user.nick);
+        this.players.push(player.get());
         this.mustUpdate = true;
-        socket.emit(this.SOCKETS.JOIN, { status: true, window: this.window, camera: this.camera, id: user.id });
+        socket.emit(this.SOCKETS.JOIN, {status: true, window: this.window, self: player.getSelf()});
     }
-
+    
     move(data) {
-        const { x, y, token } = data;
-        const user = this.mediator.get(this.mediator.TRIGGERS.GET_USER_BY_TOKEN, token);
-        if (!user) return;
-        this.players.forEach((player) => {
-            if (player.id == user.id) {
+        const { x, y, guid}  = data;
+        const user = this.mediator.get(this.mediator.TRIGGERS.GET_USER_BY_GUID, guid);
+        if(!user) return;
+        this.players.forEach( (player) => {
+            if(player.id == user.id){
                 player.x += x;
                 player.y += y;
-                if (player.x >= this.window.width) player.x = this.window.width;
-                if (player.y >= this.window.height) player.y = this.window.height;
-                if (player.x <= 0) player.x = 0;
-                if (player.y <= 0) player.y = 0;
+                if(player.x >= this.window.width) player.x = this.window.width;
+                if(player.y >= this.window.height) player.y = this.window.height;
+                if(player.x <= 0) player.x = 0;
+                if(player.y <= 0) player.y = 0;
                 this.mustUpdate = true;
             }
         });
     }
 
-    getScene() {
-        return { status: true, players: this.players, food: this.foods };
+    getScene(){
+        const food = this.foods;
+        return { status: true, players: this.players, food };
     }
 }
 

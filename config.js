@@ -11,7 +11,7 @@ const CONFIG = {
         },
         TRIGGERS: {
             GET_USER_BY_NICK: 'GET_USER_BY_NICK',
-            GET_USER_BY_TOKEN: 'GET_USER_BY_TOKEN',
+            GET_USER_BY_GUID: 'GET_USER_BY_GUID',
             GET_USER_BY_ID: 'GET_USER_BY_ID',
             LOGIN: 'LOGIN',
             DISCONNECT: 'disconnect',

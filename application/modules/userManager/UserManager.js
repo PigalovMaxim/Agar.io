@@ -12,7 +12,7 @@ class UserManager extends BaseModule {
             socket.on(this.SOCKETS.DISCONNECT, () => this.disconnect(socket.id));
         });
 
-        this.mediator.set(this.mediator.TRIGGERS.GET_USER_BY_TOKEN, token => this.getUserByToken(token));
+        this.mediator.set(this.mediator.TRIGGERS.GET_USER_BY_GUID, guid => this.getUserByGuid(guid));
     }
 
 
@@ -23,10 +23,10 @@ class UserManager extends BaseModule {
         delete this.users[user.guid];
     }
 
-    getUserByToken(token) {
+    getUserByGuid(guid) {
         const keys = Object.keys(this.users);
         for (let i = 0; i < keys.length; i++) {
-            if (this.users[keys[i]].token === token)
+            if (this.users[keys[i]].guid === guid)
                 return this.users[keys[i]];
         }
     }
