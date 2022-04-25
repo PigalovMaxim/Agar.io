@@ -13,7 +13,7 @@ class GameManager extends BaseModule {
             socket.on(this.SOCKETS.MOVE, data => this.move(data));
             socket.on(this.SOCKETS.JOIN, guid => this.join(guid, socket));
             socket.on(this.SOCKETS.EAT_FOOD, data => this.eatFood(data, socket.id));
-            socket.on(this.SOCKETS.EAT_PLAYER, data => this.eatPlayer(data, socket.id));
+            socket.on(this.SOCKETS.EAT_PLAYER, guid => this.death(guid, socket.id));
             socket.on(this.SOCKETS.INCREASE_SIZE, (score, radius, speed, guid) => this.increaseSize(score, radius, speed, guid));
             socket.on(this.SOCKETS.DISCONNECT, () => this.disconnect(socket.id));
         });
@@ -66,7 +66,7 @@ class GameManager extends BaseModule {
         const user = this.mediator.get(this.mediator.TRIGGERS.GET_USER_BY_GUID, guid);
         if(!user) return;
         this.players.forEach((player, i) => {
-            if(player.id === user.id){
+            if(player.guid === user.guid){
                 player.score = score;
                 player.radius = radius;
                 player.speed = speed;
@@ -75,22 +75,20 @@ class GameManager extends BaseModule {
         this.mustUpdate = true;
     }
 
-    eatPlayer({eatedId, guid}){
-        const user = this.mediator.get(this.mediator.TRIGGERS.GET_USER_BY_GUID, guid);
-        if(!user) return;
+    death(guid, socket) {
         this.players.forEach((player, i) => {
-            if(player.id === eatedId){
-                this.io.to(eatedId).emit('death');
+            if(player.guid === guid){
+                socket.emit('death');
                 this.players.splice(i, 1);
+                return;
             }
         });
-        this.mustUpdate = true;
     }
 
     join(guid, socket) {
         const user = this.mediator.get(this.mediator.TRIGGERS.GET_USER_BY_GUID, guid);
         if(!user) return;
-        if(this.players.find(player => player.id === user.id)) return;
+        if(this.players.find(player => player.guid === user.guid)) return;
         const player = new Player();
         player.init(user.guid, user.nick);
         this.players.push(player.get());
@@ -103,7 +101,7 @@ class GameManager extends BaseModule {
         const user = this.mediator.get(this.mediator.TRIGGERS.GET_USER_BY_GUID, guid);
         if(!user) return;
         this.players.forEach( (player) => {
-            if(player.id == user.id){
+            if(player.guid == user.guid){
                 player.x += x;
                 player.y += y;
                 if(player.x >= this.window.width) player.x = this.window.width;

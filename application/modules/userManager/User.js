@@ -50,9 +50,11 @@ class User {
 
     async registration(nick, hash, socketId) {
         let user = await this.db.getUserByNick(nick);
+        console.log(nick, hash, user);
         if (!user) {
             await this.db.registration({ nick, hash });
             user = await this.db.getUserByNick(nick);
+            console.log('Вторая авторизация > ', user);
             if (user) {
                 if (await this.login(nick, hash, this.common.random(), socketId)) {
                     return true;
