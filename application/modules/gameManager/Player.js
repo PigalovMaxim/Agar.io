@@ -1,8 +1,8 @@
 class Player {
     constructor(window, generateColor, socketId) {
         //Data from user
-        this.nick;
-        this.guid;
+        this.nick; // не должно быть
+        this.guid; // не должно быть
         //Other data
         this.x;
         this.y;

@@ -2,6 +2,14 @@ const CONFIG = {
     NAME: 'Oval.io',
     VERSION: '1.0.0',
     PORT: 3001,
+
+    DATABASE: {
+        HOST: 'localhost',
+        NAME: 'ovalio',
+        USER: 'postgres',
+        PASS: '111',
+        PORT: 5432
+    },
     
     MEDIATOR: {
         EVENTS: {
@@ -29,12 +37,6 @@ const CONFIG = {
         EAT_FOOD: 'eatFood',
         MESSAGE: 'message',
         INCREASE_SIZE: 'increaseSize'
-    },
-    DATABASE: {
-        HOST: '',
-        NAME: 'agar.db',
-        USER: '',
-        PASS: '',
     },
 };
 
