@@ -7,7 +7,7 @@ const CONFIG = {
         HOST: 'localhost',
         NAME: 'ovalio',
         USER: 'postgres',
-        PASS: '111',
+        PASS: '',
         PORT: 5432
     },
     
