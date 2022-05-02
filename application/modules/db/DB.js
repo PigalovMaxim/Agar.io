@@ -17,13 +17,17 @@ class DB {
             port: PORT,
             database: NAME,
             user: USER,
-            password: PASS
+            password: PASS,
         });
         (async () => {
             await this.db.connect();
             this.orm = new ORM(this.db);
             initCB();
         })();
+
+        setTimeout(()=>{
+            this.test();
+        },1500);
     }
 
     destructor() {
@@ -38,7 +42,7 @@ class DB {
     async getUser(guid) {
         const query = 'SELECT * FROM users WHERE guid=$1';
         const result = await this.db.query(query, [guid]);
-        return result?.rows?.[0] || null;
+        return result?.rows[0] || null;
     }
 
     disconnect(nick) {
@@ -49,12 +53,16 @@ class DB {
         return await this.orm.get('users', { nick });
     }
 
-    async registration(data = {}) {
-        await this.orm.insert('users', data);
+    registration(data = {}) {
+        this.orm.insert('users', data);
     }
 
-    async setToken(id, token) {
-        return await this.orm.update('users', { id }, { token });
+     setToken(id, token) {
+        return  this.orm.update('users', { id }, { token });
+    }
+
+    async test(){
+        return await this.orm.all('users');
     }
 }
 
