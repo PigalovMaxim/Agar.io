@@ -34,7 +34,7 @@ class User {
     }
 
     logout() {
-        this.db.disconnect(this.nick);
+        this.db.setToken(this.id, null);
     }
 
     async login(nick, password, rand, socketId) {

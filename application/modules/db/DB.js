@@ -12,7 +12,7 @@ class DB {
     ) {
         this.mediator = mediator;
 
-        this.db = new Client({
+        /*this.db = new Client({
             host: HOST,
             port: PORT,
             database: NAME,
@@ -23,11 +23,7 @@ class DB {
             await this.db.connect();
             this.orm = new ORM(this.db);
             initCB();
-        })();
-
-        setTimeout(()=>{
-            this.test();
-        },1500);
+        })();*/
     }
 
     destructor() {
@@ -45,9 +41,6 @@ class DB {
         return result?.rows[0] || null;
     }
 
-    disconnect(nick) {
-        this.orm.update('users', { nick }, { token: '' });
-    }
 
     async getUserByNick(nick) {
         return await this.orm.get('users', { nick });

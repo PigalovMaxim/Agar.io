@@ -12,7 +12,7 @@ const GameManager = require("./application/modules/gameManager/GameManager");
 const { PORT, NAME, VERSION, MEDIATOR, SOCKETS, DATABASE } = require('./config');
 const common = new Common;
 const mediator = new Mediator(MEDIATOR, SOCKETS);
-const db = new DB(DATABASE, mediator);
+const db = new DB(DATABASE, mediator, async () => console.log(await db.test()));
 new UserManager({ mediator, io, db, common });
 new GameManager({ mediator, io, db, common });
 
@@ -27,8 +27,6 @@ io.on('connection', socket => {
 app.use(express.static(__dirname + "/public"));
 app.use("/", router);
 
-server.listen(PORT, () => console.log(`App ${NAME} version ${VERSION}`));
-
 function deinitModules() {
     db.destructor();
     setTimeout(() => process.exit(), 500);
@@ -36,3 +34,5 @@ function deinitModules() {
 
 //process.on();
 process.on('SIGINT', deinitModules);
+
+server.listen(PORT, () => console.log(`App ${NAME} version ${VERSION}`));
