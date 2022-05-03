@@ -8,7 +8,7 @@ class Player {
         this.radius;
         this.color;
         this.speed;
-        this.socketId = socketId;
+        //this.socketId = socketId;
         this.window = window;
         this.generateColor = generateColor;
     }
