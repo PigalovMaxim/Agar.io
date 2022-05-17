@@ -12,7 +12,7 @@ const GameManager = require("./application/modules/gameManager/GameManager");
 const { PORT, NAME, VERSION, MEDIATOR, SOCKETS, DATABASE } = require('./config');
 const common = new Common;
 const mediator = new Mediator(MEDIATOR, SOCKETS);
-const db = new DB(DATABASE, mediator, async () => console.log(await db.test()));
+const db = new DB(DATABASE, mediator);
 new UserManager({ mediator, io, db, common });
 new GameManager({ mediator, io, db, common });
 

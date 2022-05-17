@@ -6,13 +6,12 @@ const ORM = require('./ORM');
 
 class DB {
     constructor(
-        { HOST, NAME, USER, PASS, PORT }, 
-        mediator, 
-        initCB = () => null
+        { HOST, NAME, USER, PASS, PORT },
+        mediator,
     ) {
         this.mediator = mediator;
 
-        /*this.db = new Client({
+        this.db = new Client({
             host: HOST,
             port: PORT,
             database: NAME,
@@ -22,8 +21,7 @@ class DB {
         (async () => {
             await this.db.connect();
             this.orm = new ORM(this.db);
-            initCB();
-        })();*/
+        })();
     }
 
     destructor() {
@@ -32,9 +30,6 @@ class DB {
             this.db = null;
         }
     }
-    // ДИНАР ВЗЯЛ НА СЕБЯ ОТВЕТСТВЕННОСТЬ СДЕЛАТЬ ВСЁ ЗА МЕНЯ
-    // ЕСЛИ ТУТ НЕ БУДЕТ НОРМЛЬНОГО КОДА К 26.04.22 ТО ДИНАР
-    // МНЕ БУДЕТ ДОЛЖЕН 300 РОССИЙСКИХ РУБЛЕЙ
     async getUser(guid) {
         const query = 'SELECT * FROM users WHERE guid=$1';
         const result = await this.db.query(query, [guid]);
@@ -46,17 +41,14 @@ class DB {
         return await this.orm.get('users', { nick });
     }
 
-    registration(data = {}) {
-        this.orm.insert('users', data);
+    async registration(nick, password, guid) {
+        await this.orm.insert('users', { nick, password, guid });
     }
 
-     setToken(id, token) {
-        return  this.orm.update('users', { id }, { token });
+    setToken(id, token) {
+        return this.orm.update('users', { id }, { token });
     }
 
-    async test(){
-        return await this.orm.all('users');
-    }
 }
 
 module.exports = DB;

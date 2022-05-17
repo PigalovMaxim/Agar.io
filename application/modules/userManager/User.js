@@ -52,7 +52,7 @@ class User {
         let user = await this.db.getUserByNick(nick);
         if (!user) {
             const guid = this.common.guid();
-            await this.db.registration({ nick, password, guid });
+            await this.db.registration(nick, password, guid);
             user = await this.db.getUserByNick(nick);
             if (user) {
                 if (await this.login(nick, password, guid, this.common.random(), socketId)) {

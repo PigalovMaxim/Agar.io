@@ -4,39 +4,39 @@ class ORM {
     }
 
     //Получение одной записи
-    get(tables, params = {}, fields = '*', operand = 'AND') {
-        const str = Object.keys(params).map(key => `${key}=?`).join(` ${operand} `);
+    async get(tables, params = {}, fields = '*', operand = 'AND') {
+        const str = Object.keys(params).map((key, index) => `${key}=$${index+1}`).join(` ${operand} `);
         const arr = Object.values(params);
         const query = `
             SELECT ${fields} 
             FROM ${tables instanceof Array ? tables.join(', ') : tables} 
             ${str.length === 0 ? '' : `WHERE ${str}`}`;
-        const result = this.db.query(query, arr);
-        return result?.rows[0] || null;
+        const result = await this.db.query(query, arr);
+        return result?.rows?.[0] || null;
     }
 
-    all(tables, params = {}, fields = '*', operand = 'AND') {
-        const str = Object.keys(params).map(key => `${key}=?`).join(` ${operand} `);
+    async all(tables, params = {}, fields = '*', operand = 'AND') {
+        const str = Object.keys(params).map((key, index) => `${key}=$${index+1}`).join(` ${operand} `);
         const arr = Object.values(params);
         const query = `
             SELECT ${fields} 
             FROM ${tables instanceof Array ? tables.join(', ') : tables} 
             ${str.length === 0 ? '' : `WHERE ${str}`}`;
-        const result = this.db.query(query, arr);
+        const result = await this.db.query(query, arr);
         return result?.rows || null;
     }
 
-    delete(tables, params = {}, operand = 'AND') {
-        const str = Object.keys(params).map(key => `${key}=?`).join(` ${operand} `);
+    async delete(tables, params = {}, operand = 'AND') {
+        const str = Object.keys(params).map((key, index) => `${key}=$${index+1}`).join(` ${operand} `);
         const arr = Object.values(params);
         const query = `
             DELETE FROM ${tables instanceof Array ? tables.join(', ') : tables} 
             ${str.length === 0 ? '' : `WHERE ${str}`}`;
-        this.db.query(query, arr);
+        await this.db.query(query, arr);
         return true;
     }
 
-    update(tables, whereParams = {}, setParams = {}, operand = 'AND') {
+    async update(tables, whereParams = {}, setParams = {}, operand = 'AND') {
         const whereStr = Object.keys(whereParams).map(key => `${key}=?`).join(` ${operand} `);
         const whereArr = Object.values(whereParams);
         const setStr = Object.keys(setParams).map(key => `${key}=?`).join(`, `);
@@ -45,19 +45,15 @@ class ORM {
             UPDATE ${tables instanceof Array ? tables.join(', ') : tables} 
             SET ${setStr}
             ${whereStr.length === 0 ? '' : `WHERE ${whereStr}`}`;
-        this.db.query(query, whereArr, setArr);
+        await this.db.query(query, whereArr, setArr);
         return true;
     }
 
-    insert(table, params = {}) {
+    async insert(table, params = {}) {
         const str = Object.keys(params).join(`, `);
-        const arr = Object.values(params);
-        const questionMarks = [];
-        arr.forEach(a => questionMarks.push('?'));
-        const query = `
-            INSERT INTO ${table} (${str})
-            ${arr.length === 0 ? '' : `VALUES (${questionMarks.join(', ')})`}`;
-        this.db.query(query, arr);
+        const arr = Object.values(params).map((a, index) =>`$${index + 1}::text`);
+        const query = `INSERT INTO ${table}(${str}) VALUES (${arr.join(', ')})`;
+        await this.db.query(query, Object.values(params));
         return true;
     }
 }

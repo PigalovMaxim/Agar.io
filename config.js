@@ -7,8 +7,8 @@ const CONFIG = {
         HOST: 'localhost',
         NAME: 'ovalio',
         USER: 'postgres',
-        PASS: 'postgres',
-        PORT: 5432
+        PASS: '111',
+        PORT: 5433
     },
     
     MEDIATOR: {

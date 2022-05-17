@@ -37,6 +37,7 @@ class UserManager extends BaseModule {
             const user = new User(this.db, this.common);
             if (await user.registration(nick, password, socket.id)) {
                 this.users[user.guid] = user;
+                console.log(user.getSelf());
                 return socket.emit(this.SOCKETS.REGISTRATION, user.getSelf());
             }
         }
