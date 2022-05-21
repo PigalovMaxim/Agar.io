@@ -97,6 +97,7 @@ class GameManager extends BaseModule {
 
     join(guid, socket) {
         const user = this.mediator.get(this.mediator.TRIGGERS.GET_USER_BY_GUID, guid);
+        console.log(user);
         if (!user) return;
         if (this.players.find(player => player.guid === user.guid)) return;
         const player = new Player(this.window, this._generateColor, socket.id);

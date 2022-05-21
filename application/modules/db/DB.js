@@ -38,7 +38,7 @@ class DB {
 
 
     async getUserByNick(nick) {
-        return await this.orm.get('users', { nick });
+        return await this.orm.get('users', { nick }); 
     }
 
     async registration(nick, password, guid) {

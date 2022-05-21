@@ -8,7 +8,7 @@ const CONFIG = {
         NAME: 'ovalio',
         USER: 'postgres',
         PASS: '111',
-        PORT: 5433
+        PORT: 5432
     },
     
     MEDIATOR: {
