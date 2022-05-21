@@ -5,7 +5,7 @@ class ORM {
 
     //Получение одной записи
     async get(tables, params = {}, fields = '*', operand = 'AND') {
-        const str = Object.keys(params).map((key, index) => `${key}=$${index+1}`).join(` ${operand} `);
+        const str = Object.keys(params).map((key, index) => `${key}=$${index + 1}`).join(` ${operand} `);
         const arr = Object.values(params);
         const query = `
             SELECT ${fields} 
@@ -16,7 +16,7 @@ class ORM {
     }
 
     async all(tables, params = {}, fields = '*', operand = 'AND') {
-        const str = Object.keys(params).map((key, index) => `${key}=$${index+1}`).join(` ${operand} `);
+        const str = Object.keys(params).map((key, index) => `${key}=$${index + 1}`).join(` ${operand} `);
         const arr = Object.values(params);
         const query = `
             SELECT ${fields} 
@@ -27,7 +27,7 @@ class ORM {
     }
 
     async delete(tables, params = {}, operand = 'AND') {
-        const str = Object.keys(params).map((key, index) => `${key}=$${index+1}`).join(` ${operand} `);
+        const str = Object.keys(params).map((key, index) => `${key}=$${index + 1}`).join(` ${operand} `);
         const arr = Object.values(params);
         const query = `
             DELETE FROM ${tables instanceof Array ? tables.join(', ') : tables} 
@@ -37,9 +37,9 @@ class ORM {
     }
 
     async update(tables, whereParams = {}, setParams = {}, operand = 'AND') {
-        const whereStr = Object.keys(whereParams).map(key => `${key}=?`).join(` ${operand} `);
+        const whereStr = Object.keys(whereParams).map((key, index) => `${key}=$${index + 1}`).join(` ${operand} `);
         const whereArr = Object.values(whereParams);
-        const setStr = Object.keys(setParams).map(key => `${key}=?`).join(`, `);
+        const setStr = Object.keys(setParams).map((key, index) => `${key}=$${index + 1}`).join(`, `);
         const setArr = Object.values(setParams);
         const query = `
             UPDATE ${tables instanceof Array ? tables.join(', ') : tables} 
@@ -51,7 +51,7 @@ class ORM {
 
     async insert(table, params = {}) {
         const str = Object.keys(params).join(`, `);
-        const arr = Object.values(params).map((a, index) =>`$${index + 1}::text`);
+        const arr = Object.values(params).map((a, index) => `$${index + 1}::text`);
         const query = `INSERT INTO ${table}(${str}) VALUES (${arr.join(', ')})`;
         await this.db.query(query, Object.values(params));
         return true;
