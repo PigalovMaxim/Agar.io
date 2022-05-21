@@ -37,10 +37,10 @@ class User {
         this.db.setToken(this.id, null);
     }
 
-    async login(nick, password, rand, socketId) {
+    async login(nick, hash, rand, socketId) {
         const user = await this.db.getUserByNick(nick);
-        if (user && this.common.getMD5(user.password + rand) === password) {
-            const token = this.common.genHash(nick + password);
+        if (user && this.common.getMD5(user.hash + rand) === hash) {
+            const token = this.common.genHash(nick + hash);
             await this.db.setToken(user.id, token);
             this._init(user, token, socketId);
             return true;
@@ -48,16 +48,16 @@ class User {
         return false;
     }
 
-    async registration(nick, password, socketId) {
+    async registration(nick, hash, socketId) {
         let user = await this.db.getUserByNick(nick);
         if (!user) {
             const guid = this.common.guid();
-            await this.db.registration(nick, password, guid);
+            await this.db.registration(nick, hash, guid);
             user = await this.db.getUserByNick(nick);
             if (user) {
-                if (await this.login(nick, password, guid, this.common.random(), socketId)) {
-                    return true;
-                }
+                const rnd = this.common.random();
+                hash = this.common.getMD5(hash + rnd);
+                if (await this.login(nick, hash, rnd, socketId)) return true;
             }
         }
         return false;

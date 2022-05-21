@@ -1,6 +1,8 @@
 class Player {
     constructor(window, generateColor, socketId) {
         //Data from user
+        this.guid;
+        this.nick;
         //Other data
         this.x;
         this.y;
@@ -8,12 +10,14 @@ class Player {
         this.radius;
         this.color;
         this.speed;
-        //this.socketId = socketId;
+        this.socketId = socketId;
         this.window = window;
         this.generateColor = generateColor;
     }
 
-    init(){
+    init(guid, nick){
+        this.guid = guid;
+        this.nick = nick;
         this.x = Math.round(Math.random() * this.window.width);
         this.y = Math.round(Math.random() * this.window.height);
         this.score = 0;
@@ -24,6 +28,8 @@ class Player {
 
     get() {
         return {
+            guid: this.guid,
+            nick: this.nick,
             x: this.x,
             y: this.y,
             radius: this.radius,

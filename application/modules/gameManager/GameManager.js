@@ -21,7 +21,6 @@ class GameManager extends BaseModule {
             socket.on(this.SOCKETS.INCREASE_SIZE, (score, radius, speed, guid) => this.increaseSize(score, radius, speed, guid));
             socket.on(this.SOCKETS.DISCONNECT, () => this.disconnect(socket.id));
         });
-
         this.mustUpdate = true;
         this.start();
     }
@@ -86,10 +85,12 @@ class GameManager extends BaseModule {
     }
 
     death(guid, socket) {
+        console.log(this.players);
         this.players.forEach((player, i) => {
             if (player.guid === guid) {
                 socket.emit('death');
                 this.players.splice(i, 1);
+                console.log(this.players);
                 return;
             }
         });
@@ -97,7 +98,6 @@ class GameManager extends BaseModule {
 
     join(guid, socket) {
         const user = this.mediator.get(this.mediator.TRIGGERS.GET_USER_BY_GUID, guid);
-        console.log(user);
         if (!user) return;
         if (this.players.find(player => player.guid === user.guid)) return;
         const player = new Player(this.window, this._generateColor, socket.id);
@@ -112,7 +112,7 @@ class GameManager extends BaseModule {
         const user = this.mediator.get(this.mediator.TRIGGERS.GET_USER_BY_GUID, guid);
         if (!user) return;
         this.players.forEach((player) => {
-            if (player.guid == user.guid) {
+            if (guid == user.guid) {
                 player.x += x;
                 player.y += y;
                 if (player.x >= this.window.width) player.x = this.window.width;
@@ -120,6 +120,7 @@ class GameManager extends BaseModule {
                 if (player.x <= 0) player.x = 0;
                 if (player.y <= 0) player.y = 0;
                 this.mustUpdate = true;
+                return;
             }
         });
     }

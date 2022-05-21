@@ -37,15 +37,15 @@ class ORM {
     }
 
     async update(tables, whereParams = {}, setParams = {}, operand = 'AND') {
-        const whereStr = Object.keys(whereParams).map((key, index) => `${key}=$${index + 1}`).join(` ${operand} `);
-        const whereArr = Object.values(whereParams);
         const setStr = Object.keys(setParams).map((key, index) => `${key}=$${index + 1}`).join(`, `);
         const setArr = Object.values(setParams);
+        const whereStr = Object.keys(whereParams).map((key, index) => `${key}=$${index + 1 + setArr.length}`).join(` ${operand} `);
+        const whereArr = Object.values(whereParams);
         const query = `
             UPDATE ${tables instanceof Array ? tables.join(', ') : tables} 
             SET ${setStr}
             ${whereStr.length === 0 ? '' : `WHERE ${whereStr}`}`;
-        await this.db.query(query, whereArr, setArr);
+        await this.db.query(query, setArr.concat(whereArr));
         return true;
     }
 

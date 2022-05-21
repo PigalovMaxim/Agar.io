@@ -5,9 +5,9 @@ const CONFIG = {
 
     DATABASE: {
         HOST: 'localhost',
-        NAME: 'ovalio',
+        NAME: 'postgres',
         USER: 'postgres',
-        PASS: '111',
+        PASS: 'admin',
         PORT: 5432
     },
     
