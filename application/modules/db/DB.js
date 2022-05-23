@@ -36,7 +36,6 @@ class DB {
         return result?.rows[0] || null;
     }
 
-
     async getUserByNick(nick) {
         return await this.orm.get('users', { nick }); 
     }

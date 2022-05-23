@@ -4,7 +4,16 @@ const Player = require('../gameManager/Player');
 class GameManager extends BaseModule {
     constructor(options) {
         super(options);
-        this.players = [];
+        this.players = [
+            {
+                guid: '52f50e46-eea7-1c84-7d2b-d6ec1b95c7c1',
+                score: 0,
+                radius: 25,
+                speed: 3,
+                x: 0,
+                y: 0
+            }
+        ];
         
         /*this.players = {
             guid: player...
@@ -74,7 +83,7 @@ class GameManager extends BaseModule {
     increaseSize(score, radius, speed, guid) {
         const user = this.mediator.get(this.mediator.TRIGGERS.GET_USER_BY_GUID, guid);
         if (!user) return;
-        this.players.forEach((player, i) => {
+        this.players.forEach((player) => {
             if (player.guid === user.guid) {
                 player.score = score;
                 player.radius = radius;
@@ -85,12 +94,10 @@ class GameManager extends BaseModule {
     }
 
     death(guid, socket) {
-        console.log(this.players);
         this.players.forEach((player, i) => {
             if (player.guid === guid) {
                 socket.emit('death');
                 this.players.splice(i, 1);
-                console.log(this.players);
                 return;
             }
         });

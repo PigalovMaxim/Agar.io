@@ -5,7 +5,12 @@ class UserManager extends BaseModule {
     constructor(options) {
         super(options);
 
-        this.users = {};
+        this.users = {
+            '52f50e46-eea7-1c84-7d2b-d6ec1b95c7c1': {
+                nick: 'gnidkaYagodkaMalinka',
+                guid: '52f50e46-eea7-1c84-7d2b-d6ec1b95c7c1'
+            }
+        };
         this.io.on(this.SOCKETS.CONNECTION, socket => {
             socket.on(this.SOCKETS.REGISTRATION, (data) => this.registration(data, socket));
             socket.on(this.SOCKETS.LOGIN, (data) => this.login(data, socket));
